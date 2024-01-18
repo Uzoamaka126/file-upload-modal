@@ -1,0 +1,40 @@
+{
+  "name": "@uzoamaka126/file-upload-modal",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/file-upload-component.umd.cjs",
+  "module": "./dist/file-upload-component.js",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/@uzoamaka126"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/file-upload-component.js",
+      "require": "./dist/file-upload-component.umd.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "types": "./dist/types.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "generate:types": "vue-tsc --declaration --emitDeclarationOnly --outdir ./dist",
+    "build": "vite build && npm run generate:types",
+    "preserve": "vite build",
+    "serve": "vite preview --port 5050",
+    "typecheck": "vue-tsc --noEmit",
+    "preview": "vite preview",
+    "test": "exit 0"
+  },
+  "dependencies": {
+    "vue": "^3.3.11"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.4",
+    "@vitejs/plugin-vue": "^4.5.2",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8",
+    "vue-tsc": "^1.8.25"
+  }
+}
