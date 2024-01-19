@@ -1,0 +1,102 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  background: transparent;
+}
+
+/* button styles */
+.btn {
+  display: inline-block;
+  line-height: 24px; /* 150% */
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border-radius: 5px !important;
+  transition: all 0.3s ease-in-out;
+  font-family: inherit;
+  outline: none;
+  font-weight: 500 !important;
+}
+
+.btn.sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn.md {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.btn.lg {
+  padding: 12px 16px;
+  font-size: 16px;
+}
+
+.btn span {
+  color: inherit;
+}
+
+.btn svg {
+  fill: inherit;
+}
+
+.btn--block {
+  background-color: #646cff;
+  border: transparent;
+  color: #f2f2f2;
+}
+
+.btn-block:focus, .btn-block:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.btn--text {
+  outline: none;
+  border: none;
+  background: transparent !important;
+  font-size: 14px;
+  box-shadow: none;   
+  opacity: 1; 
+  font-weight: 600;
+}
+
+.btn--text {
+  color: #646cff;
+}
+
+.btn--text:hover {
+  color: #5258da;
+}
+
+.btn--outline {
+  background: transparent;
+  box-shadow: none !important;
+  border: 1px solid #646cff;
+  background: #fff;
+  color: #646cff;
+}

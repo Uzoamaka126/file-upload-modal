@@ -1,18 +1,16 @@
-<script setup lang="ts">
-import HelloWorld from './components/BaseUpload.vue'
-</script>
-
 <template>
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <UploadTriggerButton />
+    <HelloWorld msg="Vite + Vueeeeeeeejjjj" />
   </div>
-  <HelloWorld msg="Vite + Vueeeeeeeejjjj" />
 </template>
+
+<script setup lang="ts">
+import HelloWorld from './components/UploadModal.vue'
+import UploadTriggerButton from '@/components/UploadTriggerButton.vue';
+
+</script>
+
 
 <style scoped>
 .logo {

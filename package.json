@@ -14,7 +14,7 @@
       "import": "./dist/file-upload-component.js",
       "require": "./dist/file-upload-component.umd.cjs"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/css/style.css"
   },
   "types": "./dist/types.d.ts",
   "scripts": {
