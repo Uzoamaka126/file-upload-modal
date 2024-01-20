@@ -1,28 +1,28 @@
 <template>
-  <div>
-    <UploadTriggerButton />
-    <HelloWorld msg="Vite + Vueeeeeeeejjjj" />
+  <div class="app">
+    <UploadTriggerButton @click="triggerUploadModal" />
+    <template v-if="isModalOpen">
+      <UploadModal @closeModal="triggerUploadModal" />
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import HelloWorld from './components/UploadModal.vue'
-import UploadTriggerButton from '@/components/UploadTriggerButton.vue';
+import { ref } from 'vue';
+import UploadModal from './components/UploadModal.vue'
+import UploadTriggerButton from './components/UploadTriggerButton.vue';
 
+const isModalOpen = ref(false);
+
+const triggerUploadModal = () => {
+  isModalOpen.value = !isModalOpen.value;
+
+  console.log('Show modal', isModalOpen.value);
+}
 </script>
 
-
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+.app {
+  position: relative;
 }
 </style>
