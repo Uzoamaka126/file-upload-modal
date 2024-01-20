@@ -18,9 +18,7 @@
               <strong :data-hidden="![states.SUCCESS].includes(state)" class="message-done">Done!</strong>
             </div>  
             <div class="progress" :data-hidden="!showProgress">
-              <template v-if="showProgress">
-                <ProgressBar :duration="TIMEOUT" />
-              </template>
+              <ProgressBar v-if="showProgress" :duration="TIMEOUT" />
             </div>
           </div>
         </div>
@@ -95,15 +93,15 @@
   })
 
   const onMouseEnter = () => {
-
+    dispatch("MOUSEENTER")
   }
 
   const onMouseLeave = () => {
-    
+    dispatch("MOUSELEAVE")
   }
 
   const onClick = () => {
-    
+    dispatch("CLICK")
   }
 
 </script>
