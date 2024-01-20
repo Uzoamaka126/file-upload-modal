@@ -115,7 +115,7 @@ body {
 }
 
 [data-state="HOVERING"]:before {
-  transform: scale(1.1);
+  /* transform: scale(1.1); */
 }
   
 [data-state="HOVERING"] .cloud-icon {
@@ -124,6 +124,7 @@ body {
 
 [data-state="HOVERING"] .message {
   transform: translateY(.5em);
+  color: #0570FF;
 }
 
 [data-state="UPLOADING"] {

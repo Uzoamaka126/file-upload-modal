@@ -10,12 +10,12 @@
           </button>
         </div>
         <div class="modal--upload--wrap">
-          <div class="file-uploader" :data-state="state" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave" @click="onClick">
-            <CloudIcon :state="state" />
+          <div class="file-uploader" :data-state="state.current" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave" @click="onClick">
+            <CloudIcon :state="state.current" />
             <div class="message">
-              <strong :data-hidden="![states.IDLE, states.HOVERING].includes(state)">Upload</strong>
-              <strong :data-hidden="![states.UPLOADING].includes(state)" class="message-uploading">Uploading</strong>
-              <strong :data-hidden="![states.SUCCESS].includes(state)" class="message-done">Done!</strong>
+              <strong :data-hidden="![states.IDLE, states.HOVERING].includes(state.current)">Upload</strong>
+              <strong :data-hidden="![states.UPLOADING].includes(state.current)" class="message-uploading">Uploading</strong>
+              <strong :data-hidden="![states.SUCCESS].includes(state.current)" class="message-done">Done!</strong>
             </div>  
             <div class="progress" :data-hidden="!showProgress">
               <ProgressBar v-if="showProgress" :duration="TIMEOUT" />
@@ -28,60 +28,43 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch } from 'vue';
-  import { State, UploaderMachineProps, ReducerActionType } from './types'
-  import { states, events, TIMEOUT } from '../utils/constants';
-  import { useReducer } from '../composables/state';
+  import { computed, watch } from 'vue';
+  import { State, ReducerActionType } from './types'
+  import { states, TIMEOUT, uploadStateMachine } from '../utils/constants';
+  import { useReducer } from '../composables/reducer';
   import ProgressBar from './ProgressBar.vue';
   import CloudIcon from './CloudIcon.vue';
 
-  const emit = defineEmits(['closeModal'])
+  const emit = defineEmits(['closeModal']);
 
-  const uploadStateMachine = ref<UploaderMachineProps>({
-    initial: states.IDLE,
-    states: {
-      [states.IDLE]: {
-        on: {
-          [events.CLICK]: states.UPLOADING,
-          [events.MOUSEENTER]: states.HOVERING
-        }
-      },
-      [states.HOVERING]: {
-        on: {
-          [events.CLICK]: states.UPLOADING,
-          [events.MOUSELEAVE]: states.IDLE
-        }
-      },
-      [states.UPLOADING]: {
-        on: { [events.UPLOADED]: states.SUCCESS }
-      },
-      [states.SUCCESS]: {
-        on: {
-          [events.CLICK]: states.IDLE,
-          [events.RESET]: states.IDLE
-        }
+  const initialState = {
+    current: uploadStateMachine.initial
+  };
+
+  const reducer = (state: any, action: ReducerActionType) => {
+    if (uploadStateMachine.states[state.current]) {
+      return {
+        ...state,
+        current: uploadStateMachine.states[state.current].on[action.type]
       }
+    } else {
+      return state
     }
-  });
-
-  function uploaderReducer(state: keyof State, action: ReducerActionType) {
-    return (
-      (uploadStateMachine.value.states[state] && uploadStateMachine.value.states[state].on[action.type]) || state);
   }
 
-  const [state, dispatch] = useReducer(uploaderReducer, uploadStateMachine.value.initial, null);
-
+  const [state, dispatch] = useReducer(reducer, initialState);
+  
   watch(
     () => state,
       (state) => {
         console.log({ state });
         
-        switch (state) {
+        switch (state.current) {
           case states.UPLOADING:
-            setTimeout(() => dispatch(events.UPLOADED), TIMEOUT);
+            setTimeout(() => dispatch({ type: events.UPLOADED }), TIMEOUT);
             break;
           case states.SUCCESS:
-            setTimeout(() => dispatch(events.RESET), TIMEOUT);
+            setTimeout(() => dispatch({ type: events.RESET }), TIMEOUT);
             break;
         } 
       },
@@ -89,21 +72,20 @@
   );
 
   const showProgress = computed(() => {
-    return [states.UPLOADING, states.SUCCESS].includes(state);
+    return [states.UPLOADING, states.SUCCESS].includes(state.current);
   })
 
   const onMouseEnter = () => {
-    dispatch("MOUSEENTER")
+    dispatch({ type: "MOUSEENTER" })
   }
 
   const onMouseLeave = () => {
-    dispatch("MOUSELEAVE")
+    dispatch({ type: "MOUSELEAVE" })
   }
 
   const onClick = () => {
-    dispatch("CLICK")
+    dispatch({ type: "CLICK" })
   }
-
 </script>
 
 <style scoped>

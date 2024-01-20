@@ -3,9 +3,9 @@ export type ReducerReturnPayload<T> = {
     dispatch: (action: ReducerAction<T>) => void;
 }
 
-type ReducerAction<T> = {
+export type ReducerAction<T> = {
     type: string | Record<string, string>;
-    payload: T;
+    payload?: T;
 }
 
 export type InitialState<T> = T;
