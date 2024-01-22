@@ -52,4 +52,6 @@ export type ReducerActionType = {
     type: keyof Events | any
 }
 
+export type event = 'mouseenter' | 'mouseleave' | 'click' | "uploaded" | 'reset'
+
 // Ref<{ initial: string; states: { [x: string]: { on: { [x: string]: string; }; }; }; }>

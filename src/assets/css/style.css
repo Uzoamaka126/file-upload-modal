@@ -110,6 +110,10 @@ body {
   stroke: #A3B0C1; 
 }
 
+[data-state="IDLE"] .message {
+  color: #A3B0C1;
+}
+
 [data-state="HOVERING"] {
   cursor: grab;
 }
@@ -129,6 +133,10 @@ body {
 
 [data-state="UPLOADING"] {
   cursor: wait; 
+}
+
+[data-state="UPLOADING"] .message {
+  color: rgb(35, 126, 35);
 }
 
 [data-state="SUCCESS"] .arrow[data-hidden] {

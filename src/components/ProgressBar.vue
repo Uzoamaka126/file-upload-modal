@@ -4,7 +4,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-// import { useState } from '../composables/state';
 
 const props = defineProps<{ duration: number }>();
 let intervalId: any;
@@ -12,7 +11,7 @@ let intervalId: any;
   const progressValue = ref(0);
 
   const setProgressValue = () => {
-    progressValue.value += 1;
+    progressValue.value += progressValue.value + 1;
   }
 
   onMounted(() => {

@@ -10,13 +10,14 @@
           </button>
         </div>
         <div class="modal--upload--wrap">
-          <div class="file-uploader" :data-state="state.current" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave" @click="onClick">
+          <div class="file-uploader" 
+            :data-state="state.current" 
+            @mouseenter=" dispatch({ type: 'MOUSEENTER' })" 
+            @mouseleave="dispatch({ type: 'MOUSELEAVE' })" 
+            @click="dispatch({ type: 'CLICK' })"
+          >
             <CloudIcon :state="state.current" />
-            <div class="message">
-              <strong :data-hidden="![states.IDLE, states.HOVERING].includes(state.current)">Upload</strong>
-              <strong :data-hidden="![states.UPLOADING].includes(state.current)" class="message-uploading">Uploading</strong>
-              <strong :data-hidden="![states.SUCCESS].includes(state.current)" class="message-done">Done!</strong>
-            </div>  
+            <Desc :current="state.current" />
             <div class="progress" :data-hidden="!showProgress">
               <ProgressBar v-if="showProgress" :duration="TIMEOUT" />
             </div>
@@ -29,11 +30,12 @@
 
 <script setup lang="ts">
   import { computed, watch } from 'vue';
-  import { State, ReducerActionType } from './types'
+  import { ReducerActionType, event } from './types'
   import { states, TIMEOUT, uploadStateMachine } from '../utils/constants';
   import { useReducer } from '../composables/reducer';
   import ProgressBar from './ProgressBar.vue';
   import CloudIcon from './CloudIcon.vue';
+  import Desc from './Desc.vue';
 
   const emit = defineEmits(['closeModal']);
 
@@ -43,6 +45,11 @@
 
   const reducer = (state: any, action: ReducerActionType) => {
     if (uploadStateMachine.states[state.current]) {
+      console.log({
+        'uploadStateMachine.states[state.current]': uploadStateMachine.states[state.current].on[action.type],
+        state, action
+      });
+      
       return {
         ...state,
         current: uploadStateMachine.states[state.current].on[action.type]
@@ -53,38 +60,49 @@
   }
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  
-  watch(
-    () => state,
-      (state) => {
-        console.log({ state });
-        
-        switch (state.current) {
-          case states.UPLOADING:
-            setTimeout(() => dispatch({ type: events.UPLOADED }), TIMEOUT);
-            break;
-          case states.SUCCESS:
-            setTimeout(() => dispatch({ type: events.RESET }), TIMEOUT);
-            break;
-        } 
-      },
-    { immediate: true }
+
+  watch(state, (newState, oldState) => {
+    console.log({ newState, oldState });
+
+    switch (newState.current) {
+      case states.UPLOADING:
+        setTimeout(() => dispatch({ type: "UPLOADED" }), TIMEOUT);
+        break;
+      case states.SUCCESS:
+        setTimeout(() => dispatch({ type: "RESET" }), TIMEOUT);
+        break;
+    } 
+  },
+  { immediate: true }
   );
 
-  const showProgress = computed(() => {
+  const showProgress = computed(() => {   
+    console.log({ 'state.current': state.current });
+     
     return [states.UPLOADING, states.SUCCESS].includes(state.current);
   })
 
-  const onMouseEnter = () => {
-    dispatch({ type: "MOUSEENTER" })
-  }
-
-  const onMouseLeave = () => {
-    dispatch({ type: "MOUSELEAVE" })
-  }
-
-  const onClick = () => {
-    dispatch({ type: "CLICK" })
+  const eventHandler = (event: event) => {    
+    switch (event) {
+      case 'mouseenter':
+        dispatch({ type: 'MOUSEENTER' });
+        break;
+      case 'mouseleave':
+        dispatch({ type: 'MOUSELEAVE' });
+        break;
+      case 'click':
+        dispatch({ type: 'CLICK' });
+        break;
+      case 'uploaded':
+        dispatch({ type: "UPLOADED" });
+        break;
+      case 'reset':
+        dispatch({ type: "RESET" });
+        break;
+      default:
+        dispatch({ type: "RESET" });
+        break;
+    }
   }
 </script>
 

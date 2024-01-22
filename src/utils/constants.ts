@@ -34,12 +34,17 @@ export const uploadStateMachine = {
         }
       },
       [states.UPLOADING]: {
-        on: { [events.UPLOADED]: states.SUCCESS }
+        on: { 
+          [events.UPLOADED]: states.SUCCESS,
+          [events.MOUSELEAVE]: states.UPLOADING,
+          [events.MOUSEENTER]: states.UPLOADING,
+        }
       },
       [states.SUCCESS]: {
         on: {
           [events.CLICK]: states.IDLE,
-          [events.RESET]: states.IDLE
+          [events.RESET]: states.IDLE,
+          // [events.MOUSELEAVE]: states.IDLE,
         }
       }
     }
