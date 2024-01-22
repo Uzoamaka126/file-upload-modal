@@ -14,8 +14,15 @@
             :data-state="state.current" 
             @mouseenter=" dispatch({ type: 'MOUSEENTER' })" 
             @mouseleave="dispatch({ type: 'MOUSELEAVE' })" 
-            @click="dispatch({ type: 'CLICK' })"
-          >
+            @click="handleFileBtnClick"
+            >
+            <!-- @click="dispatch({ type: 'CLICK' })" -->
+          <input
+            type="file"
+            @change="e => handleFileChange(e)"
+            ref="fileRef"
+            :style="{ display: 'none' }"
+          />
             <CloudIcon :state="state.current" />
             <Desc :current="state.current" />
             <div class="progress" :data-hidden="!showProgress">
@@ -29,8 +36,8 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, watch } from 'vue';
-  import { ReducerActionType, event } from './types'
+  import { computed, watch, ref, Ref } from 'vue';
+  import { ReducerActionType, event, HTMLInputEvent, UploadModalProps } from './types'
   import { states, TIMEOUT, uploadStateMachine } from '../utils/constants';
   import { useReducer } from '../composables/reducer';
   import ProgressBar from './ProgressBar.vue';
@@ -38,6 +45,26 @@
   import Desc from './Desc.vue';
 
   const emit = defineEmits(['closeModal']);
+  const props = withDefaults(defineProps<Partial<UploadModalProps>>(), {
+    isMulti: false,
+  });
+
+  const fileRef: Ref<HTMLInputElement | null> = ref(null);
+  const files: Ref<FileList | null> = ref(null);
+
+  const handleFileBtnClick = () => {
+    console.log({ fileRef: fileRef.value });
+    
+    fileRef.value!.click()
+  }
+
+  const handleFileChange = (event: HTMLInputEvent) => {
+    console.log({ event });
+    const result = event.target?.files
+
+    files.value = result;
+    
+  }
 
   const initialState = {
     current: uploadStateMachine.initial
@@ -45,10 +72,10 @@
 
   const reducer = (state: any, action: ReducerActionType) => {
     if (uploadStateMachine.states[state.current]) {
-      console.log({
-        'uploadStateMachine.states[state.current]': uploadStateMachine.states[state.current].on[action.type],
-        state, action
-      });
+      // console.log({
+      //   'uploadStateMachine.states[state.current]': uploadStateMachine.states[state.current].on[action.type],
+      //   state, action
+      // });
       
       return {
         ...state,
@@ -62,7 +89,7 @@
   const [state, dispatch] = useReducer(reducer, initialState);
 
   watch(state, (newState, oldState) => {
-    console.log({ newState, oldState });
+    // console.log({ newState, oldState });
 
     switch (newState.current) {
       case states.UPLOADING:
@@ -77,33 +104,10 @@
   );
 
   const showProgress = computed(() => {   
-    console.log({ 'state.current': state.current });
+    // console.log({ 'state.current': state.current });
      
     return [states.UPLOADING, states.SUCCESS].includes(state.current);
   })
-
-  const eventHandler = (event: event) => {    
-    switch (event) {
-      case 'mouseenter':
-        dispatch({ type: 'MOUSEENTER' });
-        break;
-      case 'mouseleave':
-        dispatch({ type: 'MOUSELEAVE' });
-        break;
-      case 'click':
-        dispatch({ type: 'CLICK' });
-        break;
-      case 'uploaded':
-        dispatch({ type: "UPLOADED" });
-        break;
-      case 'reset':
-        dispatch({ type: "RESET" });
-        break;
-      default:
-        dispatch({ type: "RESET" });
-        break;
-    }
-  }
 </script>
 
 <style scoped>

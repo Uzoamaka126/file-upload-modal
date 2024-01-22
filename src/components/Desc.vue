@@ -3,7 +3,6 @@
         <strong :data-hidden="![states.IDLE, states.HOVERING].includes(props.current)">Upload</strong>
         <strong :data-hidden="![states.UPLOADING].includes(props.current)" class="message-uploading">Uploading</strong>
         <strong :data-hidden="![states.SUCCESS].includes(props.current)" class="message-done">Done!</strong>
-
     </div>  
   </template>
   
@@ -15,8 +14,4 @@
        current: '',
     });
   </script>
-  
-  <style scoped>
-
-  </style>
   

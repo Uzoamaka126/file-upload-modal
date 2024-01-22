@@ -24,13 +24,13 @@ import { TriggerButtonProps } from './types';
 
 const emit = defineEmits(['click'])
 
-const props = withDefaults(defineProps<TriggerButtonProps>(), {
-    buttonType: 'text',
-    label: 'Click to upload',
-    disabled: false,
-    isCustomIcon: false,
-    iconPosition: "none",
-    size: 'md',
+const props = withDefaults(defineProps<Partial<TriggerButtonProps>>(), {
+  buttonType: 'text',
+  label: 'Click to upload',
+  disabled: false,
+  isCustomIcon: false,
+  iconPosition: "none",
+  size: 'md',
 });
 
 const btnTypeClass = computed(() => {

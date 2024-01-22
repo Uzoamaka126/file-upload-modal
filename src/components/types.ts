@@ -1,23 +1,28 @@
 export interface TriggerButtonProps {
-    buttonType?: "text" | "block" | "outline";
-    styleObj?: Record<string, string>;
+    buttonType: "text" | "block" | "outline";
+    styleObj: Record<string, string>;
     label: string;
-    iconPosition?: "left" | "right" | "none";
-    isCustomIcon?: boolean;
-    classNames?: Array<string>;
-    disabled?: boolean;
-    size?: "sm" | "md" | "lg"
+    iconPosition: "left" | "right" | "none";
+    isCustomIcon: boolean;
+    classNames: Array<string>;
+    disabled: boolean;
+    size: "sm" | "md" | "lg"
 }
 
 export type UploadModalProps = {
-    options?: {
-        isMulti?: boolean;
-        isApiKey?: boolean;
-    }
-    callback: () => void;
+    isMulti: boolean;
+    isApiKey: boolean;
+    styles: {};
+    classes: {};
+    mimeTypes: Array<string>;
+    onComplete: () => void;
+    onCancel: () => void;
+    onClose: () => void;
+    onOpen: () => void;
+    onFileSelected: () => void;
+    onFileUploadCompleted: () => void;
 }
 
-// export type State = "IDLE" | "HOVERING" | "UPLOADING" | "SUCCESS";
 export type State = {
     IDLE: "IDLE"; 
     HOVERING: "HOVERING"; 
@@ -52,6 +57,10 @@ export type ReducerActionType = {
     type: keyof Events | any
 }
 
-export type event = 'mouseenter' | 'mouseleave' | 'click' | "uploaded" | 'reset'
+export type event = 'mouseenter' | 'mouseleave' | 'click' | "uploaded" | 'reset';
+
+export interface HTMLInputEvent extends Event {
+    target: HTMLInputElement & EventTarget;
+}
 
 // Ref<{ initial: string; states: { [x: string]: { on: { [x: string]: string; }; }; }; }>
