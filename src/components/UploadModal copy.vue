@@ -2,71 +2,36 @@
   <div class="modal--overlay" ref="">
     <div class="modal--body">
       <div class="modal--content">
-        <div class="modal--header" :style="{ justifyContent: isFileUpload ? 'space-between' : 'flex-end' }">
-          <span v-if="isFileUpload" class="" data-testid="bottom-drawer_title">Uploads</span>
-          <button type="button" class="modal--close" style="line-height: 0px;" @click="closeAndResetModal">
+        <div class="modal--header">
+          <button type="button" class="modal--close" style="line-height: 0px;" @click="$emit('closeModal')">
             <svg viewBox="0 0 24 24" class="icon_close" width="24" height="24">
               <path fill="currentColor" fill-rule="nonzero" d="M5.146 5.146a.5.5 0 0 1 .708 0L12 11.293l6.146-6.147a.5.5 0 0 1 .638-.057l.07.057a.5.5 0 0 1 0 .708L12.707 12l6.147 6.146a.5.5 0 0 1 .057.638l-.057.07a.5.5 0 0 1-.708 0L12 12.707l-6.146 6.147a.5.5 0 0 1-.638.057l-.07-.057a.5.5 0 0 1 0-.708L11.293 12 5.146 5.854a.5.5 0 0 1-.057-.638z"></path>
             </svg>
           </button>
         </div>
         <div class="modal--upload--wrap">
-          <template v-if="!isFileUpload">
-            <div class="file--upload--wrap" 
-              :data-state="state.current" 
-              @mouseenter=" dispatch({ type: 'MOUSEENTER' })" 
-              @mouseleave="dispatch({ type: 'MOUSELEAVE' })" 
-              @click="handleFileBtnClick"
-              >
-              <!-- @click="dispatch({ type: 'CLICK' })" -->
-            <input
-              type="file"
-              @change="e => handleFileChange(e)"
-              @cancel=""
-              ref="fileRef"
-              :accept="computedFileTypes"
-              v-bind:multiple="props.isMulti"
-              :style="{ display: 'none' }"
-            />
-              <CloudIcon :state="state.current" />
-              <Desc :current="state.current" />
-              <div class="progress" :data-hidden="!showProgress">
-                <ProgressBar v-if="showProgress" :duration="TIMEOUT" />
-              </div>
+          <div class="file-uploader" 
+            :data-state="state.current" 
+            @mouseenter=" dispatch({ type: 'MOUSEENTER' })" 
+            @mouseleave="dispatch({ type: 'MOUSELEAVE' })" 
+            @click="handleFileBtnClick"
+            >
+            <!-- @click="dispatch({ type: 'CLICK' })" -->
+          <input
+            type="file"
+            @change="e => handleFileChange(e)"
+            @cancel=""
+            ref="fileRef"
+            :accept="computedFileTypes"
+            v-bind:multiple="props.isMulti"
+            :style="{ display: 'none' }"
+          />
+            <CloudIcon :state="state.current" />
+            <Desc :current="state.current" />
+            <div class="progress" :data-hidden="!showProgress">
+              <ProgressBar v-if="showProgress" :duration="TIMEOUT" />
             </div>
-          </template>
-          <template v-else>
-            <div class="file--uploaded--wrap">
-              <ul class="file--list" :style="computeFileListHeight">
-                <li v-for="file in files" :key="file.name" class="file--item">
-                  <template v-if="isFileUploading">
-                    <div class="file--desc">
-                      <p class="file--name">{{  file.name }}</p>
-                      <p class="file--badge">{{  file.type }}</p>
-                    </div>
-                    <span class="file--item--cancel btn btn--text">Cancel</span>
-                  </template>
-                  <template v-else>
-                    <div class="success">
-                      <span class="file--check--icon">
-                        <svg v-if="!isFileCancelled" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" style="fill: #83c3ad; transform: ;msFilter:;">
-                          <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm-1.999 14.413-3.713-3.705L7.7 11.292l2.299 2.295 5.294-5.294 1.414 1.414-6.706 6.706z"></path>
-                        </svg>
-                        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: #fa551e;transform: ;msFilter:;">
-                          <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm4.207 12.793-1.414 1.414L12 13.414l-2.793 2.793-1.414-1.414L10.586 12 7.793 9.207l1.414-1.414L12 10.586l2.793-2.793 1.414 1.414L13.414 12l2.793 2.793z"></path>
-                        </svg>
-                      </span>
-                      <div class="file--desc">
-                        <p class="file--name">{{  file.name }}</p>
-                        <p class="file--badge">{{  file.type }}</p>
-                      </div>
-                    </div>
-                    <span class="file--item--cancel btn btn--text">Remove</span>
-                  </template>
-                </li>
-              </ul>
-            </div>
-          </template>
+          </div>
         </div>
       </div>
     </div>
@@ -84,16 +49,13 @@
 
   const emit = defineEmits(['closeModal']);
   const props = withDefaults(defineProps<Partial<UploadModalProps>>(), {
-    isMulti: true,
+    isMulti: false,
     mimeTypes: ".pdf",
     styles: () => ({})
   });
 
   const fileRef: Ref<HTMLInputElement | null> = ref(null);
   const files: Ref<FileList | null> = ref(null);
-  const isFileUpload = ref(false);
-  const isFileUploading = ref(false);
-  const isFileCancelled = ref(false)
 
   // Computed properties
   const computedFileTypes = computed(() => {
@@ -105,39 +67,30 @@
       }
     } 
     return props.mimeTypes;
-  });
-
-  const computeFileListHeight = computed(() => {
-    if (files.value!?.length > 4) {
-      return { height: '370px', overflow: 'scroll' }
-    } else {
-      return { height: 'auto', overflow: 'auto' }
-    }
-  });
+  })
 
   const handleFileBtnClick = () => {
     console.log({ fileRef: fileRef.value });
     
+    // dispatch({ type: "CLICK" });
+
     fileRef.value!.click();
   }
 
   const handleFileChange = (event: Event) => {
-    console.log({ event });
+    // console.log({ event });
     const result = (event.target as HTMLInputEvent['target'])?.files;
 
-    if (result?.length) {
-      isFileUpload.value = true;
-      files.value = result;
-    }
+    // dispatch({ type: "SELECTED" })
+
+    files.value = result;
   }
 
-  const closeAndResetModal = () => {
-    files.value = null;
-    fileRef.value = null;
-    isFileUpload.value = false;
-    isFileUploading.value = false;
+  const handleFileUploadCancel = (e: Event) => {
+    const target = e.target as HTMLInputEvent['target'];
 
-    emit("closeModal")
+    console.log(e.cancelable);
+    
   }
 
   const initialState = {
@@ -210,6 +163,7 @@
 
 .modal--header {
   display: flex;
+  justify-content: flex-end;
 }
 
 .modal--body {
@@ -229,7 +183,6 @@
   border: 1px solid #888;
   width: 80%;
   border-radius: 10px;
-  min-height: 407px;
 }
 
 .modal--close {

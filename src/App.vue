@@ -23,6 +23,7 @@ const fileUploadOptions = {
 const triggerUploadModal = () => {  
   isModalOpen.value = !isModalOpen.value;
 }
+
 </script>
 
 <style scoped>

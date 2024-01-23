@@ -25,8 +25,10 @@ export const uploadStateMachine = {
     states: {
       [states.IDLE]: {
         on: {
-          [events.CLICK]: states.UPLOADING,
-          [events.MOUSEENTER]: states.HOVERING
+          // [events.CLICK]: states.UPLOADING,
+          [events.CLICK]: states.SELECTION,
+          [events.MOUSEENTER]: states.HOVERING,
+          [events.MOUSELEAVE]: states.IDLE
         }
       },
       [states.HOVERING]: {
@@ -53,10 +55,15 @@ export const uploadStateMachine = {
         on: {
           [events.CLICK]: states.IDLE,
           [events.RESET]: states.IDLE,
-          // [events.MOUSELEAVE]: states.IDLE,
+          [events.MOUSELEAVE]: states.IDLE,
         }
       }
     }
 };
 
-export const defaultFileTypes = "image/*,.pdf,.doc,.docx,.xml,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+export const defaultFileTypes = "image/*,.pdf,.doc,.docx,.xml,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+export const fileExtensions = {
+  'application/pdf': 'pdf',
+  
+}
