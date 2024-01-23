@@ -20,7 +20,10 @@
           <input
             type="file"
             @change="e => handleFileChange(e)"
+            @cancel=""
             ref="fileRef"
+            :accept="computedFileTypes"
+            v-bind:multiple="props.isMulti"
             :style="{ display: 'none' }"
           />
             <CloudIcon :state="state.current" />
@@ -37,8 +40,8 @@
 
 <script setup lang="ts">
   import { computed, watch, ref, Ref } from 'vue';
-  import { ReducerActionType, event, HTMLInputEvent, UploadModalProps } from './types'
-  import { states, TIMEOUT, uploadStateMachine } from '../utils/constants';
+  import { ReducerActionType, HTMLInputEvent, UploadModalProps } from './types'
+  import { states, TIMEOUT, uploadStateMachine, defaultFileTypes } from '../utils/constants';
   import { useReducer } from '../composables/reducer';
   import ProgressBar from './ProgressBar.vue';
   import CloudIcon from './CloudIcon.vue';
@@ -47,22 +50,45 @@
   const emit = defineEmits(['closeModal']);
   const props = withDefaults(defineProps<Partial<UploadModalProps>>(), {
     isMulti: false,
+    mimeTypes: ".pdf",
+    styles: () => ({})
   });
 
   const fileRef: Ref<HTMLInputElement | null> = ref(null);
   const files: Ref<FileList | null> = ref(null);
 
+  // Computed properties
+  const computedFileTypes = computed(() => {
+    if (props.isMulti) {
+      if (props.mimeTypes?.length) {
+        return props.mimeTypes;
+      } else {
+        return defaultFileTypes
+      }
+    } 
+    return props.mimeTypes;
+  })
+
   const handleFileBtnClick = () => {
     console.log({ fileRef: fileRef.value });
     
-    fileRef.value!.click()
+    dispatch({ type: "CLICK" })
+    fileRef.value!.click();
   }
 
-  const handleFileChange = (event: HTMLInputEvent) => {
+  const handleFileChange = (event: Event) => {
     console.log({ event });
-    const result = event.target?.files
+    const result = (event.target as HTMLInputEvent['target'])?.files;
+
+    dispatch({ type: "SELECTED" })
 
     files.value = result;
+  }
+
+  const handleFileUploadCancel = (e: Event) => {
+    const target = e.target as HTMLInputEvent['target'];
+
+    console.log(e.cancelable);
     
   }
 
@@ -89,15 +115,20 @@
   const [state, dispatch] = useReducer(reducer, initialState);
 
   watch(state, (newState, oldState) => {
-    // console.log({ newState, oldState });
+    console.log({ newState, oldState });
 
     switch (newState.current) {
+      case states.SELECTION:
+        setTimeout(() => dispatch({ type: "SELECTED" }), TIMEOUT);
+        break;
       case states.UPLOADING:
         setTimeout(() => dispatch({ type: "UPLOADED" }), TIMEOUT);
         break;
       case states.SUCCESS:
         setTimeout(() => dispatch({ type: "RESET" }), TIMEOUT);
         break;
+      default:
+        setTimeout(() => dispatch({ type: "RESET" }), TIMEOUT);
     } 
   },
   { immediate: true }

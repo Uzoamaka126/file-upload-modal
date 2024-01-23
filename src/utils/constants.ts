@@ -3,6 +3,7 @@ import { UploaderMachineProps } from "../components/types";
 export const states = { 
     IDLE: "IDLE", 
     HOVERING: "HOVERING", 
+    SELECTION: "SELECTION", 
     UPLOADING: "UPLOADING", 
     SUCCESS: "SUCCESS" 
 };
@@ -11,6 +12,7 @@ export const events = {
     MOUSEENTER: "MOUSEENTER", 
     MOUSELEAVE: "MOUSELEAVE", 
     CLICK: "CLICK", 
+    SELECTED: "SELECTED", 
     SUCCESS: "SUCCESS", 
     RESET: "RESET", 
     UPLOADED: "UPLOADED" 
@@ -29,8 +31,15 @@ export const uploadStateMachine = {
       },
       [states.HOVERING]: {
         on: {
-          [events.CLICK]: states.UPLOADING,
+          [events.CLICK]: states.SELECTION,
           [events.MOUSELEAVE]: states.IDLE
+        }
+      },
+      [states.SELECTION]: {
+        on: { 
+          [events.SELECTED]: states.UPLOADING,
+          [events.MOUSELEAVE]: states.UPLOADING,
+          [events.MOUSEENTER]: states.UPLOADING,
         }
       },
       [states.UPLOADING]: {
@@ -49,3 +58,5 @@ export const uploadStateMachine = {
       }
     }
 };
+
+export const defaultFileTypes = "image/*,.pdf,.doc,.docx,.xml,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"

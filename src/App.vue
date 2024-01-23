@@ -1,8 +1,8 @@
 <template>
   <div class="app">
-    <UploadTriggerButton @click="triggerUploadModal" v-bind="{...fileUploadOptions.buttonOptions}" />
+    <UploadTriggerButton @click="triggerUploadModal" v-bind="{ ...fileUploadOptions.buttonOptions} " />
     <template v-if="isModalOpen">
-      <UploadModal @closeModal="triggerUploadModal" v-bind="fileUploadOptions.modalOptions" />
+      <UploadModal @closeModal="triggerUploadModal" v-bind="{ ...fileUploadOptions.modalOptions }" />
     </template>
   </div>
 </template>

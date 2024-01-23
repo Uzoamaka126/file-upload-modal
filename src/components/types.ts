@@ -9,12 +9,13 @@ export interface TriggerButtonProps {
     size: "sm" | "md" | "lg"
 }
 
-export type UploadModalProps = {
+export type ModalStyles = Partial<CSSStyleDeclaration> & {}
+export interface UploadModalProps {
     isMulti: boolean;
     isApiKey: boolean;
-    styles: {};
-    classes: {};
-    mimeTypes: Array<string>;
+    styles: ModalStyles;
+    classes: string;
+    mimeTypes: string;
     onComplete: () => void;
     onCancel: () => void;
     onClose: () => void;
