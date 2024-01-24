@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, watch, ref, Ref } from 'vue';
+  import { computed, watch, watchEffect, ref, Ref } from 'vue';
   import { 
   ReducerActionType, 
   HTMLInputEvent, 
@@ -177,10 +177,10 @@
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  watch(state, (newState, oldState) => {
-    console.log({ newState, oldState });
-
-    switch (newState.current) {
+  watch([() => state, () => isFileUpload, () => files.value?.length], ([state, fileUpload, length]) => {
+    console.log({ "state.current": state.current, fileUpload, length});
+    
+    switch (state.current) {
       case states.SELECTION:
         setTimeout(() => dispatch({ type: "SELECTED" }), TIMEOUT);
         break;
@@ -191,9 +191,33 @@
         setTimeout(() => dispatch({ type: "RESET" }), TIMEOUT);
         break;
     } 
+
+    if (fileUpload.value && !length) {
+      dispatch({ type: "RESET" })
+    }
   },
   { immediate: true }
   );
+
+  // watchEffect(() => {
+  //   console.log({ 'state.current': state.current, state });
+
+  //   switch (state.current) {
+  //     case states.SELECTION:
+  //       setTimeout(() => dispatch({ type: "SELECTED" }), TIMEOUT);
+  //       break;
+  //     case states.UPLOADING:
+  //       setTimeout(() => dispatch({ type: "UPLOADED" }), TIMEOUT);
+  //       break;
+  //     case states.SUCCESS:
+  //       setTimeout(() => dispatch({ type: "RESET" }), TIMEOUT);
+  //       break;
+  //   } 
+
+  //   if (isFileUpload.value && !files.value?.length) {
+  //     dispatch({ type: "MOUSEENTER" })
+  //   }
+  // });
 
   const showProgress = computed(() => {   
     // console.log({ 'state.current': state.current });

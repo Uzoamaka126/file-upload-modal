@@ -34,7 +34,8 @@ export const uploadStateMachine = {
       [states.HOVERING]: {
         on: {
           [events.CLICK]: states.SELECTION,
-          [events.MOUSELEAVE]: states.IDLE
+          [events.MOUSELEAVE]: states.IDLE,
+          [events.RESET]: states.IDLE,
         }
       },
       [states.SELECTION]: {
@@ -65,5 +66,5 @@ export const defaultFileTypes = "image/*,.pdf,.doc,.docx,.xml,application/msword
 
 export const fileExtensions = {
   'application/pdf': 'pdf',
-  
+
 }
