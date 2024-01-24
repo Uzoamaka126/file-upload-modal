@@ -2,8 +2,8 @@
   <div class="modal--overlay" ref="">
     <div class="modal--body">
       <div class="modal--content">
-        <div class="modal--header" :style="{ justifyContent: isFileUpload ? 'space-between' : 'flex-end' }">
-          <span v-if="isFileUpload" class="" data-testid="bottom-drawer_title">Uploads</span>
+        <div class="modal--header" :style="{ justifyContent: files?.length ? 'space-between' : 'flex-end' }">
+          <span v-if="files?.length" class="" data-testid="bottom-drawer_title">Uploads</span>
           <button type="button" class="modal--close" style="line-height: 0px;" @click="closeAndResetModal">
             <svg viewBox="0 0 24 24" class="icon_close" width="24" height="24">
               <path fill="currentColor" fill-rule="nonzero" d="M5.146 5.146a.5.5 0 0 1 .708 0L12 11.293l6.146-6.147a.5.5 0 0 1 .638-.057l.07.057a.5.5 0 0 1 0 .708L12.707 12l6.147 6.146a.5.5 0 0 1 .057.638l-.057.07a.5.5 0 0 1-.708 0L12 12.707l-6.146 6.147a.5.5 0 0 1-.638.057l-.07-.057a.5.5 0 0 1 0-.708L11.293 12 5.146 5.854a.5.5 0 0 1-.057-.638z"></path>
@@ -11,14 +11,13 @@
           </button>
         </div>
         <div class="modal--upload--wrap">
-          <template v-if="!isFileUpload">
+          <template v-if="!files?.length">
             <div class="file--upload--wrap" 
               :data-state="state.current" 
               @mouseenter=" dispatch({ type: 'MOUSEENTER' })" 
               @mouseleave="dispatch({ type: 'MOUSELEAVE' })" 
               @click="handleFileBtnClick"
               >
-              <!-- @click="dispatch({ type: 'CLICK' })" -->
             <input
               type="file"
               @change="e => handleFileChange(e)"
@@ -38,7 +37,7 @@
           <template v-else>
             <div class="file--uploaded--wrap">
               <ul class="file--list" :style="computeFileListHeight">
-                <li v-for="file in files" :key="file.name" class="file--item">
+                <li v-for="file, index in files" :key="file.name" class="file--item">
                   <template v-if="isFileUploading">
                     <div class="file--desc">
                       <p class="file--name">{{  file.name }}</p>
@@ -61,7 +60,7 @@
                         <p class="file--badge">{{  file.type }}</p>
                       </div>
                     </div>
-                    <span class="file--item--cancel btn btn--text">Remove</span>
+                    <span class="file--item--cancel btn btn--text" @click="removeFileByIndex(index)">Remove</span>
                   </template>
                 </li>
               </ul>
@@ -75,7 +74,11 @@
 
 <script setup lang="ts">
   import { computed, watch, ref, Ref } from 'vue';
-  import { ReducerActionType, HTMLInputEvent, UploadModalProps } from './types'
+  import { 
+  ReducerActionType, 
+  HTMLInputEvent, 
+  UploadModalProps,
+} from './types'
   import { states, TIMEOUT, uploadStateMachine, defaultFileTypes } from '../utils/constants';
   import { useReducer } from '../composables/reducer';
   import ProgressBar from './ProgressBar.vue';
@@ -103,8 +106,9 @@
       } else {
         return defaultFileTypes
       }
-    } 
-    return props.mimeTypes;
+    }  else {
+      return props.mimeTypes;
+    }
   });
 
   const computeFileListHeight = computed(() => {
@@ -115,14 +119,25 @@
     }
   });
 
-  const handleFileBtnClick = () => {
-    console.log({ fileRef: fileRef.value });
+  // methods
+  const removeFileByIndex = (index: number) => {    
+    const dt = new DataTransfer();
+      
+    for (let i = 0; i < files.value!.length; i++) {
+      const item = files.value![i];
+
+      if (index !== i)
+        dt.items.add(item)
+      }
     
+    files.value = dt.files;  
+  }
+
+  const handleFileBtnClick = () => {    
     fileRef.value!.click();
   }
 
   const handleFileChange = (event: Event) => {
-    console.log({ event });
     const result = (event.target as HTMLInputEvent['target'])?.files;
 
     if (result?.length) {

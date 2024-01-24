@@ -1,10 +1,10 @@
 export interface TriggerButtonProps {
     buttonType: "text" | "block" | "outline";
-    styleObj: Record<string, string>;
+    styleObj: Record<string, string> | null;
     label: string;
     iconPosition: "left" | "right" | "none";
     isCustomIcon: boolean;
-    classNames: Array<string>;
+    classes: string;
     disabled: boolean;
     size: "sm" | "md" | "lg"
 }
@@ -16,12 +16,19 @@ export interface UploadModalProps {
     styles: ModalStyles;
     classes: string;
     mimeTypes: string;
+    isDropActive: boolean;
+    
     onComplete: () => void;
     onCancel: () => void;
     onClose: () => void;
     onOpen: () => void;
     onFileSelected: () => void;
     onFileUploadCompleted: () => void;
+}
+
+export type AppProps = {
+    buttonOptions: TriggerButtonProps,
+    modalOptions: Partial<UploadModalProps>
 }
 
 export type State = {
@@ -64,4 +71,12 @@ export interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget;
 }
 
-// Ref<{ initial: string; states: { [x: string]: { on: { [x: string]: string; }; }; }; }>
+export interface CustomFile extends File {
+    isDrag: boolean;
+}
+
+export interface CustomFileList extends Array<CustomFile> {};
+
+export interface CustomDataTransferObject extends DataTransfer {
+    files: CustomFile[]
+};

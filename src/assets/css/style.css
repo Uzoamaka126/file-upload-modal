@@ -131,13 +131,13 @@ ul, p, ol {
 }
 
 .file--upload--wrap::after {
-  font-size: 10px;
+  /* font-size: 10px;
   position: absolute;
   top: 1rem;
   left: 1rem;
   font-family: monospace;
   content: attr(data-state);
-  opacity: 0.2;
+  opacity: 0.2; */
 }
 
 .file--upload--wrap:before {

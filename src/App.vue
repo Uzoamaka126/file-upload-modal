@@ -1,28 +1,56 @@
 <template>
   <div class="app">
-    <UploadTriggerButton @click="triggerUploadModal" v-bind="{ ...fileUploadOptions.buttonOptions} " />
+    <button 
+      class="btn" 
+      type="button" 
+      v-bind="$attrs"
+      :class="[props.buttonOptions.classes, btnTypeClass, props.buttonOptions.size]" 
+      :style="props.buttonOptions.styleObj"
+      :disabled="props.buttonOptions.disabled" 
+      @click="triggerUploadModal"
+    >
+    <span>
+        <slot v-if="props.buttonOptions.iconPosition === 'left'" name="left-icon" />
+        <span>
+            {{ props.buttonOptions.label }}
+        </span>
+        <slot v-if="props.buttonOptions.iconPosition === 'right'" name="suffix-icon" />
+    </span>
+    </button>
     <template v-if="isModalOpen">
-      <UploadModal @closeModal="triggerUploadModal" v-bind="{ ...fileUploadOptions.modalOptions }" />
+      <UploadModal @closeModal="triggerUploadModal" v-bind="{ ...props.modalOptions }" />
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { TriggerButtonProps, UploadModalProps } from './components/types.ts';
+import { ref, computed } from 'vue';
+import { AppProps } from './components/types.ts';
 import UploadModal from './components/UploadModal.vue'
-import UploadTriggerButton from './components/UploadTriggerButton.vue';
 
 const isModalOpen = ref(false);
 
-const fileUploadOptions = {
-  buttonOptions: {} as TriggerButtonProps,
-  modalOptions: {} as UploadModalProps
-}
+const props = withDefaults(defineProps<Partial<AppProps>>(), {
+  buttonOptions: () => ({
+    buttonType: 'text',
+    label: 'Click to upload',
+    disabled: false,
+    isCustomIcon: false,
+    iconPosition: "none",
+    size: 'md',
+    classes: '',
+    styleObj: null
+  }),
+  modalOptions: () => ({})
+});
 
 const triggerUploadModal = () => {  
   isModalOpen.value = !isModalOpen.value;
 }
+
+const btnTypeClass = computed(() => {
+  return `btn--${props.buttonOptions.buttonType}` || 'btn--block'
+});
 
 </script>
 
