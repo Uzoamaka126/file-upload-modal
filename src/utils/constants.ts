@@ -1,5 +1,3 @@
-import { UploaderMachineProps } from "../components/types";
-
 export const states = { 
     IDLE: "IDLE", 
     HOVERING: "HOVERING", 
@@ -25,38 +23,25 @@ export const uploadStateMachine = {
     states: {
       [states.IDLE]: {
         on: {
-          // [events.CLICK]: states.UPLOADING,
-          [events.CLICK]: states.SELECTION,
+          [events.CLICK]: states.UPLOADING,
           [events.MOUSEENTER]: states.HOVERING,
-          [events.MOUSELEAVE]: states.IDLE
         }
       },
       [states.HOVERING]: {
         on: {
-          [events.CLICK]: states.SELECTION,
+          [events.CLICK]: states.UPLOADING,
           [events.MOUSELEAVE]: states.IDLE,
-          [events.RESET]: states.IDLE,
-        }
-      },
-      [states.SELECTION]: {
-        on: { 
-          [events.SELECTED]: states.UPLOADING,
-          [events.MOUSELEAVE]: states.UPLOADING,
-          [events.MOUSEENTER]: states.UPLOADING,
         }
       },
       [states.UPLOADING]: {
         on: { 
           [events.UPLOADED]: states.SUCCESS,
-          [events.MOUSELEAVE]: states.UPLOADING,
-          [events.MOUSEENTER]: states.UPLOADING,
         }
       },
       [states.SUCCESS]: {
         on: {
           [events.CLICK]: states.IDLE,
           [events.RESET]: states.IDLE,
-          [events.MOUSELEAVE]: states.IDLE,
         }
       }
     }

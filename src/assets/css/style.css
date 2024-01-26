@@ -40,6 +40,14 @@ ul, p, ol {
   padding: 0;
 }
 
+.flex, .align-center {
+  display: flex;
+}
+
+.align-center {
+  align-items: center;
+}
+
 /* initial trigger button */
 .btn {
   display: inline-block;
@@ -131,13 +139,56 @@ ul, p, ol {
 }
 
 .file--upload--wrap::after {
-  /* font-size: 10px;
+  font-size: 10px;
   position: absolute;
   top: 1rem;
   left: 1rem;
   font-family: monospace;
   content: attr(data-state);
-  opacity: 0.2; */
+  opacity: 0.2;
+}
+
+.file--upload--wrap input {
+  /* position: absolute;
+  top: 2px;
+  height: 100%;
+  width: 100%;
+  border: 1px solid; */
+}
+
+.modal--header span::after {
+  font-size: 10px;
+  position: absolute;
+  top: 10rem;
+  left: 1rem;
+  font-family: monospace;
+  content: attr(data-state);
+  opacity: 0.2;
+}
+
+.modal--header--title {
+  margin-right: 10px;
+  line-height: 21px;
+  font-size: 18px;
+}
+
+.modal--header--add {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.upload--btns {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.upload--btn--cancel {
+  margin-right: 10px;
 }
 
 .file--upload--wrap:before {
@@ -206,9 +257,9 @@ ul, p, ol {
   cursor: grab;
 }
 
-[data-state="HOVERING"]:before {
-  /* transform: scale(1.1); */
-}
+/* [data-state="HOVERING"]:before {
+  transform: scale(1.1);
+} */
   
 [data-state="HOVERING"] .cloud-icon {
   transform: translateY(-.5em);
@@ -280,7 +331,14 @@ ul, p, ol {
   flex-wrap: wrap;
 }
 
-.file-desc {
+.file--list li {
+  width: 100%;
+  max-width: 100%;
+  padding: 5px 15px;
+  margin-bottom: 1rem;
+}
+
+.file-desc, .file--item {
   width: 100%;
 }
 
@@ -288,10 +346,8 @@ ul, p, ol {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  max-width: 100%;
-  padding: 5px 15px;
-  margin-bottom: 1rem;
+  margin-bottom: 8px; 
+  /* 01-271-5340 */
 }
 
 .file--name {
@@ -299,6 +355,8 @@ ul, p, ol {
   white-space: nowrap;
   font-size: 12px;
   line-height: 20px;
+  text-overflow: ellipsis;
+  width: 409px;
 }
 
 .file--badge {

@@ -48,6 +48,10 @@ const triggerUploadModal = () => {
   isModalOpen.value = !isModalOpen.value;
 }
 
+const handleFileUploadComplete = (payload: FileList) => {
+  return payload;
+}
+
 const btnTypeClass = computed(() => {
   return `btn--${props.buttonOptions.buttonType}` || 'btn--block'
 });

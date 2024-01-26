@@ -6,6 +6,8 @@ export function useState(initialState: any) {
   const setState = (newState: any) => {
     state.value = newState;
   };
+
+  const readonlyState = readonly(state);
   
-  return [readonly(state), setState];
+  return [readonlyState, setState];
 }
