@@ -25,6 +25,7 @@ export const uploadStateMachine = {
         on: {
           [events.CLICK]: states.UPLOADING,
           [events.MOUSEENTER]: states.HOVERING,
+          [events.MOUSELEAVE]: states.IDLE,
         }
       },
       [states.HOVERING]: {
@@ -51,5 +52,17 @@ export const defaultFileTypes = "image/*,.pdf,.doc,.docx,.xml,application/msword
 
 export const fileExtensions = {
   'application/pdf': 'pdf',
-
-}
+  '.jpg': 'JPG',
+  '.jpeg': 'JPEG',
+  '.doc': 'DOC',
+  '.png': 'PNG',
+  '.docx': 'DOCX',
+  '.xml': 'XML',
+  '.mp4': 'MP4',
+  '.avi': 'AVI',
+  '.mkv': 'MKV',
+  '.gif': 'GIF',
+  '.webp': 'WEBP',
+  '.svg': 'SVG',
+  '.bmp': 'BMP',
+} as Record<string, string>

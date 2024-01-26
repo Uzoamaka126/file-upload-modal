@@ -178,6 +178,11 @@ ul, p, ol {
   align-items: center;
 }
 
+.error--text {
+  font-size: 12px;
+  color: rgb(215, 75, 75);
+}
+
 .upload--btns {
   width: 100%;
   display: flex;
@@ -185,6 +190,10 @@ ul, p, ol {
   padding: 1rem;
   align-items: center;
   margin-top: 1.5rem;
+}
+
+.upload--btns.double {
+  justify-content: space-between;
 }
 
 .upload--btn--cancel {
@@ -347,7 +356,6 @@ ul, p, ol {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px; 
-  /* 01-271-5340 */
 }
 
 .file--name {
@@ -364,13 +372,24 @@ ul, p, ol {
   font-size: 10px;
   margin-left: -4px;
   padding: 4px 8px;
-  background-color: #c6c8ec;
+  background-color: #eaeaea;
   text-transform: uppercase;
   font-weight: 600;
   border-radius: 10px;
   margin-bottom: 0;
   margin-top: 5px;
   width: fit-content;
+}
+
+.file--meta {
+  display: flex;
+  align-items: baseline;
+}
+
+.file--size {
+  font-size: 12px;
+  color: #212;
+  margin-left: 10px;
 }
 
 .file--item--cancel {

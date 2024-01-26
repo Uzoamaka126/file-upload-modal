@@ -36,16 +36,8 @@
           <template v-else>
             <div class="file--uploaded--wrap">
               <ul class="file--list" :style="computeFileListHeight">
-                <li v-for="file, index in fileArr" :key="file.name">
+                <li v-for="file in fileArr" :key="file.name">
                   <div class="file--item">
-                    <template v-if="isFileUploading">
-                      <div class="file--desc">
-                        <p class="file--name">{{  file.name }}</p>
-                        <p class="file--badge">{{  file.type }}</p>
-                      </div>
-                      <span class="file--item--cancel btn btn--text">Cancel</span>
-                  </template>
-                  <template v-else>
                     <div class="success">
                       <span class="file--check--icon">
                         <svg v-if="!isFileCancelled" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" style="fill: #83c3ad; transform: ;msFilter:;">
@@ -56,33 +48,40 @@
                         </svg>
                       </span>
                       <div class="file--desc">
-                        <p class="file--name">{{  file.name }}</p>
-                        <p class="file--badge">{{  file.type }}</p>
+                        <p class="file--name">{{ file.name }}</p>
+                        <div class="file--meta">
+                          <p class="file--badge">{{ file.modifiedFileType }}</p>
+                          <p class="file--size">{{ file.modifiedFileSize }}</p>
+                        </div>
                       </div>
                     </div>
                     <span class="file--item--cancel btn btn--text" @click="removeFileByIndex(file.name)">Remove</span>
-                  </template>
-                </div>
-                <div class="progress" :data-hidden="!showProgressBar">
-                  <ProgressBar v-if="showProgressBar" :duration="TIMEOUT" />
-                </div>
+                  </div>
+                  <!-- <div class="progress" :data-hidden="!showProgressBar">
+                    <ProgressBar v-if="showProgressBar" :duration="TIMEOUT" />
+                  </div> -->
                 </li>
-                <div class="upload--btns align-center">
-                  <button class="btn btn--outline sm upload--btn--cancel" type="button" @click="closeAndResetModal">Cancel</button>
-                  <button class="btn btn--block sm upload--btn--complete" type="button" @click="onUploadComplete">Finish</button>
+                <div class="upload--btns align-center" :class="{ 'double': fileUploadSizeExceeded }">
+                  <div v-if="fileUploadSizeExceeded">
+                    <p class="error--text">File upload size exceeded. Max size is <strong>5MB</strong></p>
+                  </div>
+                  <div>
+                    <button class="btn btn--outline sm upload--btn--cancel" type="button" @click="closeAndResetModal">Cancel</button>
+                    <button class="btn btn--block sm upload--btn--complete" type="button" @click="onUploadComplete">Finish</button>
+                  </div>
                 </div>
               </ul>
             </div>
           </template>
           <input
-              type="file"
-              @change="e => handleFileChange(e)"
-              @cancel=""
-              ref="fileRef"
-              :accept="computedFileTypes"
-              v-bind:multiple="props.isMulti"
-              :style="{ display: 'none' }"
-            />
+            type="file"
+            @change="e => handleFileChange(e)"
+            @cancel="handleFileCancel"
+            ref="fileRef"
+            :accept="computedFileTypes"
+            v-bind:multiple="props.isMulti"
+            :style="{ display: 'none' }"
+          />
         </div>
       </div>
     </div>
@@ -90,34 +89,38 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, watch, ref, Ref } from 'vue';
+  import { computed, ref, Ref, watchEffect } from 'vue';
   import { 
   ReducerActionType, 
   HTMLInputEvent, 
   UploadModalProps,
+  CustomFile
 } from './types'
-  import { states, TIMEOUT, uploadStateMachine, defaultFileTypes } from '../utils/constants';
+  import { states, TIMEOUT, uploadStateMachine, defaultFileTypes, fileExtensions } from '../utils/constants';
   import { useReducer } from '../composables/reducer';
   import ProgressBar from './ProgressBar.vue';
   import CloudIcon from './CloudIcon.vue';
 
   const emit = defineEmits(['closeModal', 'onComplete', 'OnCancel', 'onFileCompleted', 'onFileSelected']);
   const props = withDefaults(defineProps<Partial<UploadModalProps>>(), {
-    isMulti: true,
+    isMulti: false,
     mimeTypes: ".pdf",
+    maxUploadSize: 5000 * 1000, // 5MB
     styles: () => ({})
   });
 
   // Refs & definitions
   const fileRef: Ref<HTMLInputElement | null> = ref(null);
-  const files: Ref<FileList | null> = ref(null);
+  // const files: Ref<FileList | null> = ref(null);
   const fileArr = ref([] as any[])
   const isFileUpload = ref(false);
-  const isFileUploading = ref(false);
   const isFileCancelled = ref(false);
   const initialState = {
     current: uploadStateMachine.initial
   };
+  const fileArrTotalSize = ref(0);
+  const fileUploadSizeExceeded = ref(false);
+  const invalidFileType = ref(0)
 
   // Computed properties
   const computedFileTypes = computed(() => {
@@ -141,15 +144,38 @@
   });
 
   const showProgressBar = computed(() => {  
-    console.log({ "state.current": state.value.current });
+    // console.log({ "state.current": state.value.current });
           
     // return [states.UPLOADING, states.SUCCESS].includes(state.value.current);
     return false
   })
 
   // methods
+  const validFileType = (type: string) => {
+    return props.mimeTypes.includes(type);
+  }
+
+  const returnFileSize = (size: number): string => {
+    if (size < 1024) {
+      return `${size} bytes`;
+    } else if (size >= 1024 && size < 1048576) {
+      return `${(size / 1024).toFixed(1)} KB`;
+    } else if (size >= 1048576) {
+      return `${(size / 1048576).toFixed(1)} MB`;
+    } else {
+      return `${size} bytes`
+    }
+  }
+
   const removeFileByIndex = (name: string) => {    
-    fileArr.value = fileArr.value.filter(item => item?.name !== name)
+    fileArr.value = fileArr.value.filter((item) => {
+      if (item.name === name) {
+        fileArrTotalSize.value = fileArrTotalSize.value - item?.size;
+      };
+
+      return item?.name !== name
+    });
+
     // const dt = new DataTransfer();
       
     // for (let i = 0; i < file.value!.length; i++) {
@@ -169,12 +195,21 @@
   const handleFileChange = (event: Event) => {
     const result = (event.target as HTMLInputEvent['target'])?.files;
       
-    if (result?.length) {      
+    if (result?.length) {            
       isFileUpload.value = true;
             
       for (let i = 0; i < result.length; i++) {
-        const item = result[i];
+        const item = result[i] as CustomFile;
+
+        if (!validFileType(item.type)) {
+          invalidFileType.value = invalidFileType.value + 1;
+          item.isFileTypeValid = false;
+        }
+        item.modifiedFileSize = returnFileSize(item.size);
+        item.modifiedFileType = fileExtensions[item.type] || item.type;
         
+        fileArrTotalSize.value = item.size + fileArrTotalSize.value;
+
         fileArr.value.push(item)
       }
     
@@ -182,11 +217,14 @@
     }
   }
 
+  const handleFileCancel = (event: Event) => {
+    console.log("Cancelled.");
+  }
+
   const closeAndResetModal = () => {
     fileArr.value = [];
     fileRef.value = null;
     isFileUpload.value = false;
-    isFileUploading.value = false;
 
     dispatch({ type: "RESET" });
 
@@ -214,22 +252,26 @@
 
   const [state, dispatch] = useReducer(reducer, initialState);  
 
-  watch([() => state, () => isFileUpload, () => fileArr.value?.length], ([currentState, fileUpload, length]) => {
-    switch (currentState.value.current) {
+  watchEffect(() => {
+    // console.log({ 'state.value.current': state.value.current });
+    switch (state.value.current) {
       case states.UPLOADING:
-        setTimeout(() => dispatch({ type: "UPLOADED" }), TIMEOUT);
+        setTimeout(() => dispatch({ type: "UPLOADED" }), 1000);
         break;
-      case states.SUCCESS:
-        setTimeout(() => dispatch({ type: "RESET" }), TIMEOUT);
-        break;
+      // case states.SUCCESS:
+      //   setTimeout(() => dispatch({ type: "RESET" }), 500);
+      //   break;
     } 
 
-    if (fileUpload.value && !length) {
-      dispatch({ type: "RESET" })
+    if (isFileUpload.value && !fileArr.value?.length) {
+      dispatch({ type: "RESET" });
+      isFileUpload.value = false;
     }
-  },
-  { immediate: true }
-  );
+
+    if (fileArrTotalSize.value > props.maxUploadSize) {
+      fileUploadSizeExceeded.value = true;
+    }
+  });
 </script>
 
 <style scoped>

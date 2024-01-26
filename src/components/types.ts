@@ -13,6 +13,7 @@ export type ModalStyles = Partial<CSSStyleDeclaration> & {}
 export interface UploadModalProps {
     isMulti: boolean;
     isApiKey: boolean;
+    maxUploadSize: number;
     styles: ModalStyles;
     classes: string;
     mimeTypes: string;
@@ -73,10 +74,7 @@ export interface HTMLInputEvent extends Event {
 
 export interface CustomFile extends File {
     isDrag: boolean;
+    modifiedFileSize: string;
+    modifiedFileType: string;
+    isFileTypeValid: boolean;
 }
-
-export interface CustomFileList extends Array<CustomFile> {};
-
-export interface CustomDataTransferObject extends DataTransfer {
-    files: CustomFile[]
-};

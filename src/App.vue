@@ -18,7 +18,11 @@
     </span>
     </button>
     <template v-if="isModalOpen">
-      <UploadModal @closeModal="triggerUploadModal" v-bind="{ ...props.modalOptions }" />
+      <UploadModal 
+        v-bind="{ ...props.modalOptions }" 
+        @closeModal="triggerUploadModal"
+        @onComplete="handleFileUploadComplete" 
+      />
     </template>
   </div>
 </template>
