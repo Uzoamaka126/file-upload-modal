@@ -28,7 +28,7 @@ const isModalOpen = ref(false);
 const toggleModalDisplay = () => {
   console.log('clicked on toggleModalDisplay');
   
-  isModalOpen.value = !isModalOpen.value
+  isModalOpen.value = !isModalOpen.value;
 }
 
 const handleFileUploadComplete = (payload: FileList) => {

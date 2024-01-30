@@ -2,12 +2,17 @@
   <transition>
     <template v-if="props.persist">
       <transition name="fade" :duration="300" mode="out-in">
-        <div>
+        <template>
           <Teleport to="body" :disabled="props.disabled">
             <div class="modal--overlay" v-show="reactiveShow" tabindex="-1" role="dialog">
               <div class="modal--body" @keyup.stop.esc="hide">
-                <div ref="focusElem" class="visually-hidden modal__outline" tabindex="0" v-click-outside="hide" />
-                <div class="modal--content" :class="props.modalContentClasses" @click.stop="emit('click')">
+                <div ref="focusElem" class="visually-hidden modal__outline" tabindex="0" />
+                <div 
+                  class="modal--content" 
+                  :class="props.modalContentClasses" 
+                  v-click-outside="hide"
+                  @click.stop="emit('click')"
+                >
                   <div class="modal--header" :style="{ justifyContent: fileArr?.length ? 'space-between' : 'flex-end' }">
                     <div v-if="fileArr?.length" class="align-center">
                       <span class="modal--header--title">Uploads</span>
@@ -17,7 +22,7 @@
                         </svg>
                       </span>
                     </div>
-                    <button type="button" class="modal--close" style="line-height: 0px;" @click="$emit('toggleModal', false)">
+                    <button type="button" class="modal--close" style="line-height: 0px;" @click="$emit('close')">
                       <svg viewBox="0 0 24 24" class="icon_close" width="24" height="24">
                         <path fill="currentColor" fill-rule="nonzero" d="M5.146 5.146a.5.5 0 0 1 .708 0L12 11.293l6.146-6.147a.5.5 0 0 1 .638-.057l.07.057a.5.5 0 0 1 0 .708L12.707 12l6.147 6.146a.5.5 0 0 1 .057.638l-.057.07a.5.5 0 0 1-.708 0L12 12.707l-6.146 6.147a.5.5 0 0 1-.638.057l-.07-.057a.5.5 0 0 1 0-.708L11.293 12 5.146 5.854a.5.5 0 0 1-.057-.638z"></path>
                       </svg>
@@ -91,7 +96,7 @@
               </div>
             </div>
           </Teleport>
-        </div>
+        </template>
       </transition>
     </template>
   </transition>
@@ -110,7 +115,7 @@
   // import ProgressBar from './ProgressBar.vue';
   import CloudIcon from './CloudIcon.vue';
 
-  const emit = defineEmits(['toggle-modal', 'click', 'close-modal',  'onComplete', 'OnCancel', 'onFileCompleted', 'onFileSelected']);
+  const emit = defineEmits(['toggle-modal', 'click', 'close',  'onComplete', 'OnCancel', 'onFileCompleted', 'onFileSelected']);
 
   defineModel({
     required: true,
@@ -167,10 +172,8 @@
 
   // methods
   const hide = (event: Event) => {
-    console.log({ event, el });
-    
-      // event.preventDefault();
-    // event.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
   }
 
   const validFileType = (type: string) => {
@@ -274,51 +277,38 @@
 
   // directives
   const vClickOutside = {
-    bind: (el: Element, binding: DirectiveBinding, vNode: VNode) => {
-      console.log({ el, binding, vNode });
-      
-      // // Provided expression must evaluate to a function.
-      // if (typeof binding.value !== "function") {
-      //     const compName = vNode.context.name;
-      //     let warn = `[Vue-click-outside:] provided expression '${binding.expression}' is not a function, but has to be`;
-      //     if (compName) {
-      //         warn += `Found in component '${compName}'`;
-      //     }
+    mounted(el: Element & any, binding: DirectiveBinding, vNode: VNode) {
+      if (typeof binding.value !== "function") {
+        // const compName = vNode.;
+        let warn = `[Vue-click-outside:] provided expression '${binding.value}' is not a function, but is required`;
+        console.warn(warn);
+      }
 
-      //     console.warn(warn);
-      // }
-      // // Define Handler and cache it on the element
-      // const bubble = binding.modifiers.bubble;
-      // const handler = (e) => {
-      //     if (bubble || (!el.contains(e.target) && el !== e.target)) {
-      //         binding.value(e);
-      //     }
-      // };
-      // el.__vueClickOutside__ = handler;
+      // Define Handler and cache it on the element
+      const bubble = binding.modifiers.bubble;
 
-      // // add Event Listeners
-      // document.addEventListener("click", handler);
+      const handler = (event: any) => {
+        if (bubble || (!el.contains(event.target) && el !== event.target)) {
+          binding.value(event);
+        }
+      };
+      el.__vueClickOutside__ = handler;
+
+      // add Event Listeners
+      document.addEventListener("click", handler);
     },
 
-    unbind: (el: any) => {
+    unmounted(el: Element & any) {
       // Remove Event Listeners
-      // document.removeEventListener("click", el.__vueClickOutside__);
-      // el.__vueClickOutside__ = null;
+      document.removeEventListener("click", el.__vueClickOutside__);
+      el.__vueClickOutside__ = null;
     },
   }
 
   const [state, dispatch] = useReducer(reducer, initialState);  
 
-  watch(reactiveShow, (newValue) => {
-    if (newValue) {
-      emit("toggle-modal");
-    }
-  })
-
   watchEffect(() => {
-    if (props.showModal) {
-      reactiveShow.value = true;
-    }
+    reactiveShow.value = props.showModal;
 
     if (state.value.current === states.UPLOADING) {
       setTimeout(() => dispatch({ type: "UPLOADED" }), 1000);
@@ -330,7 +320,7 @@
       isFileUpload.value = false;
     }
 
-    if (fileArrTotalSize.value > props.maxUploadSize) {
+    if (fileArrTotalSize.value > props.maxUploadSize!) {
       fileUploadSizeExceeded.value = true;
     }
   });

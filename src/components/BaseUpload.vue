@@ -5,11 +5,11 @@
         </component>
         <div>
             <UploadModal 
-                  v-model="props.showModal"
-                  v-bind="props" 
-                  @closeModal="emit('toggle-modal')"
-                  @onComplete="handleFileUploadComplete" 
-              />
+                v-model="props.showModal"
+                v-bind="props" 
+                @close="emit('toggle-modal')"
+                @onComplete="handleFileUploadComplete" 
+            />
         </div>
     </div>
 </template>
@@ -37,11 +37,10 @@
   const handleFileUploadComplete = (payload: FileList) => {
     return payload;
   }
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   .app {
     position: relative;
   }
-  </style>
-  
+</style>  
