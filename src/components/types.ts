@@ -6,7 +6,8 @@ export interface TriggerButtonProps {
     isCustomIcon: boolean;
     classes: string;
     disabled: boolean;
-    size: "sm" | "md" | "lg"
+    size: "sm" | "md" | "lg";
+    buttonTag: string;
 }
 
 export type ModalStyles = Partial<CSSStyleDeclaration> & {}
@@ -15,21 +16,18 @@ export interface UploadModalProps {
     isApiKey: boolean;
     maxUploadSize: number;
     styles: ModalStyles;
-    classes: string;
+    modalContentClasses: string;
     mimeTypes: string;
     isDropActive: boolean;
-    
-    onComplete: () => void;
-    onCancel: () => void;
-    onClose: () => void;
-    onOpen: () => void;
-    onFileSelected: () => void;
-    onFileUploadCompleted: () => void;
+    showModal: boolean;
+    persist: boolean;
+    align: 'center' | 'middle' | 'left' | 'right' | 'bottom';
+    disabled: boolean;
 }
 
-export type AppProps = {
-    buttonOptions: TriggerButtonProps,
-    modalOptions: Partial<UploadModalProps>
+export type AppProps = Partial<UploadModalProps> & {
+    buttonTag: string;
+    buttonClass: string;
 }
 
 export type State = {

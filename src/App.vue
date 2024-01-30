@@ -1,65 +1,39 @@
 <template>
-  <div class="app">
-    <button 
-      class="btn" 
-      type="button" 
-      v-bind="$attrs"
-      :class="[props.buttonOptions.classes, btnTypeClass, props.buttonOptions.size]" 
-      :style="props.buttonOptions.styleObj"
-      :disabled="props.buttonOptions.disabled" 
-      @click="triggerUploadModal"
-    >
-    <span>
-        <slot v-if="props.buttonOptions.iconPosition === 'left'" name="left-icon" />
-        <span>
-            {{ props.buttonOptions.label }}
-        </span>
-        <slot v-if="props.buttonOptions.iconPosition === 'right'" name="suffix-icon" />
-    </span>
-    </button>
+  <div>
+    <!-- <component :is="props.buttonTag" class="btn" @click="triggerUploadModal">
+      <slot />
+    </component>
     <template v-if="isModalOpen">
       <UploadModal 
         v-bind="{ ...props.modalOptions }" 
         @closeModal="triggerUploadModal"
         @onComplete="handleFileUploadComplete" 
       />
-    </template>
+    </template> -->
+    <BaseUpload @toggle-modal="toggleModalDisplay" :show-modal="isModalOpen">
+      <template #triggerButton>
+        Click here to upload
+      </template>
+    </BaseUpload>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { AppProps } from './components/types.ts';
-import UploadModal from './components/UploadModal.vue'
+import BaseUpload from './components/BaseUpload.vue'
 
 const isModalOpen = ref(false);
 
-const props = withDefaults(defineProps<Partial<AppProps>>(), {
-  buttonOptions: () => ({
-    buttonType: 'text',
-    label: 'Click to upload',
-    disabled: false,
-    isCustomIcon: false,
-    iconPosition: "none",
-    size: 'md',
-    classes: '',
-    styleObj: null
-  }),
-  modalOptions: () => ({})
-});
-
-const triggerUploadModal = () => {  
-  isModalOpen.value = !isModalOpen.value;
+const toggleModalDisplay = () => {
+  console.log('clicked on toggleModalDisplay');
+  
+  isModalOpen.value = !isModalOpen.value
 }
 
 const handleFileUploadComplete = (payload: FileList) => {
   return payload;
 }
-
-const btnTypeClass = computed(() => {
-  return `btn--${props.buttonOptions.buttonType}` || 'btn--block'
-});
-
 </script>
 
 <style scoped>
