@@ -22,7 +22,7 @@ export interface UploadModalProps {
     modalContentClasses: string;
     mimeTypes: string;
     isDropActive: boolean;
-    showModal: boolean;
+    show: boolean;
     persist: boolean;
     align: 'center' | 'middle' | 'left' | 'right' | 'bottom';
     disabled: boolean;

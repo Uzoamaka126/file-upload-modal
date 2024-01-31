@@ -1,16 +1,14 @@
 <template>
     <div>
-        <component :is="props.buttonTag" @click="emit('toggle-modal')" :class="props.buttonClass">
+        <component :is="props.buttonTag" @click="isModalOpen = true" :class="props.buttonClass">
             <slot name="triggerButton" />
         </component>
         <div>
             <UploadModal 
                 v-bind="props" 
-                v-model:show="props.showModal"
+                v-model:show="isModalOpen"
                 v-model:files="fileList"
-                @close="emit('toggle-modal')"
-                />
-                <!-- @update:files="setFiles"  -->
+            />
         </div>
     </div>
 </template>
@@ -24,7 +22,6 @@
   
   const props = withDefaults(defineProps<Partial<AppProps>>(), {
     buttonTag: 'button',
-    showModal: false,
     buttonClass: 'btn btn--text sm',
     isMulti: true,
     mimeTypes: ".pdf",
@@ -39,9 +36,12 @@
 
   const fileList = ref([] as any[]);
 
-  const handleFileUploadComplete = (payload: FileList) => {
-    return payload;
+  const isModalOpen = ref(false);
+
+  const toggleModalDisplay = () => {  
+    isModalOpen.value = !isModalOpen.value;
   }
+
 </script>
   
 <style scoped>

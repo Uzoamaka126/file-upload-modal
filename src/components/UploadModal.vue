@@ -22,7 +22,7 @@
                         </svg>
                       </span>
                     </div>
-                    <button type="button" class="modal--close" style="line-height: 0px;" @click="$emit('close')">
+                    <button type="button" class="modal--close" style="line-height: 0px;" @click="$emit('update:show', false)">
                       <svg viewBox="0 0 24 24" class="icon_close" width="24" height="24">
                         <path fill="currentColor" fill-rule="nonzero" d="M5.146 5.146a.5.5 0 0 1 .708 0L12 11.293l6.146-6.147a.5.5 0 0 1 .638-.057l.07.057a.5.5 0 0 1 0 .708L12.707 12l6.147 6.146a.5.5 0 0 1 .057.638l-.057.07a.5.5 0 0 1-.708 0L12 12.707l-6.146 6.147a.5.5 0 0 1-.638.057l-.07-.057a.5.5 0 0 1 0-.708L11.293 12 5.146 5.854a.5.5 0 0 1-.057-.638z"></path>
                       </svg>
@@ -57,10 +57,7 @@
                             <div class="file--item">
                               <div class="success">
                                 <span class="file--check--icon">
-                                  <svg v-if="!isFileCancelled" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" style="fill: #83c3ad; transform: ;msFilter:;">
-                                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm-1.999 14.413-3.713-3.705L7.7 11.292l2.299 2.295 5.294-5.294 1.414 1.414-6.706 6.706z"></path>
-                                  </svg>
-                                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: #fa551e;transform: ;msFilter:;">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: #fa551e;transform: ;msFilter:;">
                                     <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm4.207 12.793-1.414 1.414L12 13.414l-2.793 2.793-1.414-1.414L10.586 12 7.793 9.207l1.414-1.414L12 10.586l2.793-2.793 1.414 1.414L13.414 12l2.793 2.793z"></path>
                                   </svg>
                                 </span>
@@ -134,16 +131,15 @@
   const props = defineProps<Partial<UploadModalProps>>();
 
   // emits
-  const emit = defineEmits(['toggle-modal', 'click', 'close', 'update:files',  'onComplete', 'OnCancel', 'onFileCompleted', 'onFileSelected']);
+  const emit = defineEmits(['update:show', 'click', 'update:files',  'onComplete', 'OnCancel', 'onFileCompleted', 'onFileSelected']);
 
   // Refs & definitions
-  const reactiveShow = ref(props.showModal);
+  const reactiveShow = ref(props.show);
   const fileRef: Ref<HTMLInputElement | null> = ref(null);
   const dragZoneRef: Ref<HTMLInputElement | null> = ref(null);
   const fileArr = ref(props.files! || [] as any);
   const fileListUpdater = ref(props.files! || [] as any);
   const isFileUpload = ref(false);
-  const isFileCancelled = ref(false);
   const initialState = {
     current: uploadStateMachine.initial
   };
@@ -173,9 +169,7 @@
     }
   });
 
-  const showProgressBar = computed(() => {  
-    // console.log({ "state.current": state.value.current });
-          
+  const showProgressBar = computed(() => {            
     // return [states.UPLOADING, states.SUCCESS].includes(state.value.current);
     return false
   })
@@ -197,6 +191,11 @@
   })
 
   // methods
+  const closeModal = () => {
+    reactiveShow.value = false;
+    emit('update:show', false);
+  }
+
   const hide = (event: Event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -277,15 +276,20 @@
   }
 
   const closeAndResetModal = () => {
-    // fileArr.value = props.files || [];
-    emit('update:files', [])
-
+    fileListUpdater.value = [];
+    dragZoneRef.value = null;
     fileRef.value = null;
+    dragging.value = false;
+    fileUploadSizeExceeded.value = false;
     isFileUpload.value = false;
+    invalidFileTypeCount.value = 0;
+    fileArrTotalSize.value = 0;
 
     dispatch({ type: "RESET" });
 
-    emit("close")
+    emit('update:files', []);
+
+    closeModal();
   }
 
   const reducer = (state: any, action: ReducerActionType) => {    
@@ -302,9 +306,10 @@
   const onUploadComplete = () => {
     const payload = {
       files: fileArr.value,
-    }
+    };
+
     emit("onComplete", payload); // return the selected files back to the parent
-    emit("close");
+    closeAndResetModal();
   }
 
   const dragStartHandler = (event: DragEvent) => {
@@ -316,7 +321,6 @@
   }
 
   const dragEndHandler = (ev: DragEvent) => {
-    console.log("drag end");
     ev.target!.classList.remove("dragging");
   }
 
@@ -383,7 +387,7 @@
   }, { immediate: true, deep: true })
 
   watchEffect(() => {
-    reactiveShow.value = props.showModal;
+    reactiveShow.value = props.show;
 
     if (state.value.current === states.UPLOADING) {
       setTimeout(() => dispatch({ type: "UPLOADED" }), 1000);
@@ -425,6 +429,7 @@
 .modal--header {
   display: flex;
   position: relative;
+  margin-bottom: 1rem;
 }
 
 .modal--body {
