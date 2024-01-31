@@ -39,9 +39,6 @@
 
   const fileList = ref([] as any[]);
 
-  const setFiles = (files: any) => {
-  }
-
   const handleFileUploadComplete = (payload: FileList) => {
     return payload;
   }

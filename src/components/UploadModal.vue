@@ -194,7 +194,7 @@
   }
 
   const removeFileByIndex = (name: string) => {    
-    fileArr.value = fileArr.value.filter((item) => {
+    fileListUpdater.value = fileArr.value.filter((item) => {
       if (item.name === name) {
         fileArrTotalSize.value = fileArrTotalSize.value - item?.size;
       };
@@ -202,16 +202,7 @@
       return item?.name !== name
     });
 
-    // const dt = new DataTransfer();
-      
-    // for (let i = 0; i < file.value!.length; i++) {
-    //   const item = files.value![i];
-
-    //   if (index !== i)
-    //     dt.items.add(item)
-    //   }
-    
-    // files.value = dt.files;  
+    emit('update:files', fileListUpdater.value)
   }
 
   const handleFileBtnClick = () => {    
@@ -220,8 +211,6 @@
 
   const handleFileChange = (event: Event) => {
     const result = (event.target as HTMLInputEvent['target'])?.files;
-
-    console.log({ result });
     
     if (result?.length) {            
       isFileUpload.value = true;
@@ -239,13 +228,11 @@
         
         fileArrTotalSize.value = item.size + fileArrTotalSize.value;
 
-        console.log({ item });
-
         fileListUpdater.value.push(item)
       }
       
-      emit('update:files', fileListUpdater.value)
-      dispatch({ type: "CLICK" })
+      emit('update:files', fileListUpdater.value);
+      dispatch({ type: "CLICK" });
     }
   }
 
@@ -355,9 +342,7 @@
   // lifecycle hooks
   const [state, dispatch] = useReducer(reducer, initialState);
   
-  watch(() => props.files, (newVal) => {
-    console.log({ newVal });
-    
+  watch(() => props.files, (newVal) => {    
     if (newVal) {
       fileArr.value = newVal
     }
