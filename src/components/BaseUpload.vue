@@ -5,35 +5,43 @@
         </component>
         <div>
             <UploadModal 
-                v-model="props.showModal"
                 v-bind="props" 
+                v-model:show="props.showModal"
+                v-model:files="fileList"
                 @close="emit('toggle-modal')"
-                @onComplete="handleFileUploadComplete" 
-            />
+                />
+                <!-- @update:files="setFiles"  -->
         </div>
     </div>
 </template>
   
 <script setup lang="ts">
   import { AppProps } from '../components/types.ts';
+  import { ref } from 'vue';
   import UploadModal from '../components/UploadModal.vue'
   
-  const emit = defineEmits(['toggle-modal', 'update'])
+  const emit = defineEmits(['toggle-modal'])
   
   const props = withDefaults(defineProps<Partial<AppProps>>(), {
     buttonTag: 'button',
     showModal: false,
     buttonClass: 'btn btn--text sm',
-    isMulti: false,
+    isMulti: true,
     mimeTypes: ".pdf",
     maxUploadSize: 5000 * 1000, // 5MB
     styles: () => ({}),
     persist: true,
     align: 'center',
     disabled: false,
-    modalContentClasses: ''
+    modalContentClasses: '',
+    files: null
   });
-  
+
+  const fileList = ref([] as any[]);
+
+  const setFiles = (files: any) => {
+  }
+
   const handleFileUploadComplete = (payload: FileList) => {
     return payload;
   }

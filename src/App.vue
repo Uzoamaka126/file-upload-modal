@@ -10,24 +10,23 @@
         @onComplete="handleFileUploadComplete" 
       />
     </template> -->
-    <BaseUpload @toggle-modal="toggleModalDisplay" :show-modal="isModalOpen">
-      <template #triggerButton>
-        Click here to upload
-      </template>
+    <BaseUpload 
+      :show-modal="isModalOpen" 
+      @toggle-modal="toggleModalDisplay"
+    >
+      <template #triggerButton>Click here to upload</template>
     </BaseUpload>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { AppProps } from './components/types.ts';
+// import { AppProps } from './components/types.ts';
 import BaseUpload from './components/BaseUpload.vue'
 
 const isModalOpen = ref(false);
 
-const toggleModalDisplay = () => {
-  console.log('clicked on toggleModalDisplay');
-  
+const toggleModalDisplay = () => {  
   isModalOpen.value = !isModalOpen.value;
 }
 

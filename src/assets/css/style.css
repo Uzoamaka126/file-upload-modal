@@ -138,7 +138,7 @@ ul, p, ol {
   min-width: 16em;
 }
 
-.file--upload--wrap::after {
+/* .file--upload--wrap::after {
   font-size: 10px;
   position: absolute;
   top: 1rem;
@@ -146,7 +146,7 @@ ul, p, ol {
   font-family: monospace;
   content: attr(data-state);
   opacity: 0.2;
-}
+} */
 
 .file--upload--wrap input {
   /* position: absolute;
@@ -211,6 +211,7 @@ ul, p, ol {
   border-radius: 1em;
   transition: transform .3s cubic-bezier(.5, 0, .5, 1);;
   box-shadow: 0 1em 2em rgba(black, 0.1);
+  border: 2px dashed #d3d1d1;
 }
 
 .file--upload--wrap [data-hidden] {
@@ -235,6 +236,12 @@ ul, p, ol {
 .message {
   overflow: hidden;
   text-align: center;
+  font-size: 18px;
+}
+
+.message .blue {
+  font-weight: 600;
+  color: #0570FF;
 }
 
 .message strong { 

@@ -10,7 +10,10 @@ export interface TriggerButtonProps {
     buttonTag: string;
 }
 
-export type ModalStyles = Partial<CSSStyleDeclaration> & {}
+export type ModalStyles = Partial<CSSStyleDeclaration> & {};
+
+export type FileListProps<T> = T[];
+
 export interface UploadModalProps {
     isMulti: boolean;
     isApiKey: boolean;
@@ -23,6 +26,8 @@ export interface UploadModalProps {
     persist: boolean;
     align: 'center' | 'middle' | 'left' | 'right' | 'bottom';
     disabled: boolean;
+    draggable: boolean;
+    files: FileListProps<any> | null
 }
 
 export type AppProps = Partial<UploadModalProps> & {

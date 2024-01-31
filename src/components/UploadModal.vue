@@ -28,7 +28,14 @@
                       </svg>
                     </button>
                   </div>
-                  <div class="modal--upload--wrap">
+                  <div 
+                    class="modal--upload--wrap" 
+                    ref="dragZoneRef" 
+                    @dragstart="dragStartHandler" 
+                    @dragend="dragEndHandler" 
+                    @dragover="dragOverHandler"
+                    @drop="dropHandler"
+                  >
                     <template v-if="!fileArr?.length">
                       <div class="file--upload--wrap" 
                         :data-state="state.current" 
@@ -38,9 +45,7 @@
                       >
                         <CloudIcon :state="state.current" />
                         <div class="message">
-                          <strong :data-hidden="![states.IDLE, states.HOVERING].includes(state.current)">Upload a file</strong>
-                          <strong :data-hidden="![states.UPLOADING].includes(state.current)" class="message-uploading">Uploading</strong>
-                          <strong :data-hidden="![states.SUCCESS].includes(state.current)" class="message-done">Done!</strong>
+                          <p :data-hidden="![states.IDLE, states.HOVERING].includes(state.current)">Drag & Drop or <span class="blue">Choose file </span>to upload</p>
                         </div>  
                       </div>
                     </template>
@@ -70,16 +75,16 @@
                             </div>
                            
                           </li>
-                          <div class="upload--btns align-center" :class="{ 'double': fileUploadSizeExceeded }">
-                            <div v-if="fileUploadSizeExceeded">
-                              <p class="error--text">File upload size exceeded. Max size is <strong>5MB</strong></p>
-                            </div>
-                            <div>
-                              <button class="btn btn--outline sm upload--btn--cancel" type="button" @click="closeAndResetModal">Cancel</button>
-                              <button class="btn btn--block sm upload--btn--complete" type="button" @click="onUploadComplete">Finish</button>
-                            </div>
-                          </div>
                         </ul>
+                        <div class="upload--btns align-center" :class="{ 'double': fileUploadSizeExceeded }">
+                          <div v-if="fileUploadSizeExceeded">
+                            <p class="error--text">File upload size exceeded. Max size is <strong>5MB</strong></p>
+                          </div>
+                          <div>
+                            <button class="btn btn--outline sm upload--btn--cancel" type="button" @click="closeAndResetModal">Cancel</button>
+                            <button class="btn btn--block sm upload--btn--complete" type="button" @click="onUploadComplete">Finish</button>
+                          </div>
+                        </div>
                       </div>
                     </template>
                     <input
@@ -103,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, ref, Ref, Teleport, watchEffect, watch, DirectiveBinding, VNode } from 'vue';
+  import { computed, ref, Ref, Teleport, watchEffect, DirectiveBinding, VNode, watch } from 'vue';
   import { 
   ReducerActionType, 
   HTMLInputEvent, 
@@ -115,24 +120,20 @@
   // import ProgressBar from './ProgressBar.vue';
   import CloudIcon from './CloudIcon.vue';
 
-  const emit = defineEmits(['toggle-modal', 'click', 'close',  'onComplete', 'OnCancel', 'onFileCompleted', 'onFileSelected']);
-
-  defineModel({
-    required: true,
-    set: () => ({
-      prop: "showModal",
-      event: "toggle-modal",
-    })
-  });
+  defineModel('show', { required: true });
+  defineModel('files', { required: true, type: Array });
 
   const props = defineProps<Partial<UploadModalProps>>();
+
+  // emits
+  const emit = defineEmits(['toggle-modal', 'click', 'close', 'update:files',  'onComplete', 'OnCancel', 'onFileCompleted', 'onFileSelected']);
 
   // Refs & definitions
   const reactiveShow = ref(props.showModal);
   const fileRef: Ref<HTMLInputElement | null> = ref(null);
-
-  // const files: Ref<FileList | null> = ref(null);
-  const fileArr = ref([] as any[])
+  const dragZoneRef: Ref<HTMLInputElement | null> = ref(null);
+  const fileArr = ref(props.files! || [] as any);
+  const fileListUpdater = ref(props.files! || [] as any);
   const isFileUpload = ref(false);
   const isFileCancelled = ref(false);
   const initialState = {
@@ -155,7 +156,7 @@
     }
   });
 
-  const computeFileListHeight = computed(() => {
+  const computeFileListHeight = computed(() => {    
     if (fileArr.value!?.length > 4) {
       return { height: '370px', overflow: 'scroll' }
     } else {
@@ -219,7 +220,9 @@
 
   const handleFileChange = (event: Event) => {
     const result = (event.target as HTMLInputEvent['target'])?.files;
-      
+
+    console.log({ result });
+    
     if (result?.length) {            
       isFileUpload.value = true;
             
@@ -230,14 +233,18 @@
           invalidFileType.value = invalidFileType.value + 1;
           item.isFileTypeValid = false;
         }
+
         item.modifiedFileSize = returnFileSize(item.size);
         item.modifiedFileType = fileExtensions[item.type] || item.type;
         
         fileArrTotalSize.value = item.size + fileArrTotalSize.value;
 
-        fileArr.value.push(item)
+        console.log({ item });
+
+        fileListUpdater.value.push(item)
       }
-    
+      
+      emit('update:files', fileListUpdater.value)
       dispatch({ type: "CLICK" })
     }
   }
@@ -247,13 +254,15 @@
   }
 
   const closeAndResetModal = () => {
-    fileArr.value = [];
+    // fileArr.value = props.files || [];
+    emit('update:files', [])
+
     fileRef.value = null;
     isFileUpload.value = false;
 
     dispatch({ type: "RESET" });
 
-    emit("close-modal")
+    emit("close")
   }
 
   const reducer = (state: any, action: ReducerActionType) => {    
@@ -272,7 +281,45 @@
       files: fileArr.value,
     }
     emit("onComplete", payload); // return the selected files back to the parent
-    emit("close-modal");
+    emit("close");
+  }
+
+  const dragStartHandler = (ev: DragEvent) => {
+    console.log("dragStart", { ev });
+
+    ev.currentTarget!.classList.add("dragging");
+    
+    // Clear the drag data cache (for all formats/types)
+    // ev.dataTransfer!.clearData();
+    ev.dataTransfer!.setData("text/plain", ev.target!.id);
+  }
+
+  const dragEndHandler = (ev: DragEvent) => {
+    console.log("drag end");
+    ev.target!.classList.remove("dragging");
+  }
+
+  const dragOverHandler = (ev: DragEvent) => {
+    console.log("dragOver");
+    ev.preventDefault();
+    ev.dataTransfer!.dropEffect = "move";
+  }
+
+  const dropHandler = (ev: DragEvent) => {
+    console.log("Drop");
+
+    ev.preventDefault();
+    // Get the data, which is the id of the source element
+    
+    // const data = JSON.parse(ev.dataTransfer.getData("text") || "");
+    const data = ev.dataTransfer!.getData("text/plain");
+
+    console.log({ data });
+  }
+
+  const resetHandler = (ev: DragEvent) => {
+    console.log("dragStart");
+    ev.dataTransfer!.setData("text/plain", ev.target!.id);
   }
 
   // directives
@@ -305,7 +352,16 @@
     },
   }
 
-  const [state, dispatch] = useReducer(reducer, initialState);  
+  // lifecycle hooks
+  const [state, dispatch] = useReducer(reducer, initialState);
+  
+  watch(() => props.files, (newVal) => {
+    console.log({ newVal });
+    
+    if (newVal) {
+      fileArr.value = newVal
+    }
+  }, { immediate: true, deep: true })
 
   watchEffect(() => {
     reactiveShow.value = props.showModal;
