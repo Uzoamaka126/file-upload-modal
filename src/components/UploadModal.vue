@@ -33,7 +33,8 @@
                     ref="dragZoneRef" 
                     @dragstart="dragStartHandler" 
                     @dragend="dragEndHandler" 
-                    @dragover="dragOverHandler"
+                    @dragover.prevent
+                    @dragenter.prevent
                     @drop="dropHandler"
                   >
                     <template v-if="!fileArr?.length">
@@ -67,13 +68,13 @@
                                   <p class="file--name">{{ file.name }}</p>
                                   <div class="file--meta">
                                     <p class="file--badge">{{ file.modifiedFileType }}</p>
+                                    <p v-if="file.invalidFileType" class="file--badge error">Invalid file type</p>
                                     <p class="file--size">{{ file.modifiedFileSize }}</p>
                                   </div>
                                 </div>
                               </div>
                               <span class="file--item--cancel btn btn--text" @click="removeFileByIndex(file.name)">Remove</span>
-                            </div>
-                           
+                            </div>                      
                           </li>
                         </ul>
                         <div class="upload--btns align-center" :class="{ 'double': fileUploadSizeExceeded }">
@@ -82,7 +83,14 @@
                           </div>
                           <div>
                             <button class="btn btn--outline sm upload--btn--cancel" type="button" @click="closeAndResetModal">Cancel</button>
-                            <button class="btn btn--block sm upload--btn--complete" type="button" @click="onUploadComplete">Finish</button>
+                            <button 
+                              class="btn btn--block sm upload--btn--complete" 
+                              type="button"
+                              :disabled="disableCompleteBtn" 
+                              @click="onUploadComplete"
+                            >
+                              Finish
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -141,7 +149,8 @@
   };
   const fileArrTotalSize = ref(0);
   const fileUploadSizeExceeded = ref(false);
-  const invalidFileType = ref(0);
+  const invalidFileTypeCount = ref(0);
+  const dragging = ref(false);
 
   // Computed properties
   const computedFileTypes = computed(() => {
@@ -171,14 +180,30 @@
     return false
   })
 
+  const disableCompleteBtn = computed(() => {
+    if (invalidFileTypeCount.value > 0) {
+      return true
+    } 
+    
+    if (!fileArr.value.length) {
+      return true
+    }
+
+    if (fileArrTotalSize.value > (5000 * 1000)) {
+      return true
+    }
+
+    return false
+  })
+
   // methods
   const hide = (event: Event) => {
     event.preventDefault();
     event.stopPropagation();
   }
 
-  const validFileType = (type: string) => {
-    return props.mimeTypes.includes(type);
+  const validFileType = (type: string) => {    
+    return props.mimeTypes!.includes(type);
   }
 
   const returnFileSize = (size: number): string => {
@@ -193,10 +218,29 @@
     }
   }
 
+  const fileItemTransform = (item: CustomFile): CustomFile => {
+    item.modifiedFileType = fileExtensions[item.type] || item.type;
+
+    if (!validFileType(item.modifiedFileType)) {          
+      invalidFileTypeCount.value = invalidFileTypeCount.value + 1;
+      item.invalidFileType = true;
+    }
+
+    item.modifiedFileSize = returnFileSize(item.size);
+    
+    fileArrTotalSize.value = item.size + fileArrTotalSize.value;
+
+    return item;
+  } 
+
   const removeFileByIndex = (name: string) => {    
     fileListUpdater.value = fileArr.value.filter((item) => {
       if (item.name === name) {
         fileArrTotalSize.value = fileArrTotalSize.value - item?.size;
+
+        if (item?.invalidFileType) {
+          invalidFileTypeCount.value = invalidFileTypeCount.value - 1;
+        }
       };
 
       return item?.name !== name
@@ -218,17 +262,9 @@
       for (let i = 0; i < result.length; i++) {
         const item = result[i] as CustomFile;
 
-        if (!validFileType(item.type)) {
-          invalidFileType.value = invalidFileType.value + 1;
-          item.isFileTypeValid = false;
-        }
+        const transformedItem = fileItemTransform(item)
 
-        item.modifiedFileSize = returnFileSize(item.size);
-        item.modifiedFileType = fileExtensions[item.type] || item.type;
-        
-        fileArrTotalSize.value = item.size + fileArrTotalSize.value;
-
-        fileListUpdater.value.push(item)
+        fileListUpdater.value.push(transformedItem)
       }
       
       emit('update:files', fileListUpdater.value);
@@ -271,14 +307,12 @@
     emit("close");
   }
 
-  const dragStartHandler = (ev: DragEvent) => {
-    console.log("dragStart", { ev });
-
-    ev.currentTarget!.classList.add("dragging");
+  const dragStartHandler = (event: DragEvent) => {
+    event.currentTarget!.classList.add("dragging");
+    event.dataTransfer!.dropEffect = 'move'
+    event.dataTransfer!.effectAllowed = 'move'
     
-    // Clear the drag data cache (for all formats/types)
-    // ev.dataTransfer!.clearData();
-    ev.dataTransfer!.setData("text/plain", ev.target!.id);
+    event.dataTransfer!.setData("text/plain", event.target!.id);
   }
 
   const dragEndHandler = (ev: DragEvent) => {
@@ -286,27 +320,27 @@
     ev.target!.classList.remove("dragging");
   }
 
-  const dragOverHandler = (ev: DragEvent) => {
-    console.log("dragOver");
-    ev.preventDefault();
-    ev.dataTransfer!.dropEffect = "move";
-  }
+  const dropHandler = (event: DragEvent) => {
+    event.preventDefault();
+    dragging.value = false;
 
-  const dropHandler = (ev: DragEvent) => {
-    console.log("Drop");
-
-    ev.preventDefault();
     // Get the data, which is the id of the source element
-    
-    // const data = JSON.parse(ev.dataTransfer.getData("text") || "");
-    const data = ev.dataTransfer!.getData("text/plain");
+    const files = event.dataTransfer!.files;
 
-    console.log({ data });
-  }
+    if (files?.length) {            
+      isFileUpload.value = true;
+            
+      for (let i = 0; i < files.length; i++) {
+        const item = files[i] as CustomFile;
+        const transformedItem = fileItemTransform(item)
 
-  const resetHandler = (ev: DragEvent) => {
-    console.log("dragStart");
-    ev.dataTransfer!.setData("text/plain", ev.target!.id);
+        fileListUpdater.value.push(transformedItem)
+      }
+      
+      // Emit an event with the dropped files
+      emit('update:files', fileListUpdater.value);
+      dispatch({ type: "CLICK" });
+    }
   }
 
   // directives

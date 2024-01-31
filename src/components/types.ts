@@ -79,5 +79,5 @@ export interface CustomFile extends File {
     isDrag: boolean;
     modifiedFileSize: string;
     modifiedFileType: string;
-    isFileTypeValid: boolean;
+    invalidFileType: boolean;
 }
