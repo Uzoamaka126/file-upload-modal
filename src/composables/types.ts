@@ -1,19 +1,12 @@
-export type ReducerReturnPayload<T> = {
-    state: T,
-    dispatch: (action: ReducerAction<T>) => void;
+import { Ref } from "vue";
+import { Events } from "../components/types";
+
+// export interface ReducerAction<T = any> {
+export interface ReducerAction {
+    type: keyof Events | any;
+    payload?: any;
 }
 
-export type ReducerAction<T> = {
-    type: string | Record<string, string>;
-    payload?: T;
-}
+export type InitialState<T = any> = T;
 
-export type InitialState<T> = T;
-
-export type ReducerParam<T> = (state: T, action: ReducerAction<T>) => void;
-
-export type UseReducer<Type> = (
-    reducer: ReducerParam<Type>, 
-    initialState: InitialState<Type>, 
-    init: any 
-) => ReducerReturnPayload<Type>
+export type ReducerParam = (Ref<any> | ((action: ReducerAction) => void))[];

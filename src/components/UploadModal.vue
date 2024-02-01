@@ -31,8 +31,8 @@
                   <div 
                     class="modal--upload--wrap" 
                     ref="dragZoneRef" 
+                    :draggable="props.draggable"
                     @dragstart="dragStartHandler" 
-                    @dragend="dragEndHandler" 
                     @dragover.prevent
                     @dragenter.prevent
                     @drop="dropHandler"
@@ -95,7 +95,6 @@
                     <input
                       type="file"
                       @change="e => handleFileChange(e)"
-                      @cancel="handleFileCancel"
                       ref="fileRef"
                       :accept="computedFileTypes"
                       v-bind:multiple="props.isMulti"
@@ -115,7 +114,6 @@
 <script setup lang="ts">
   import { computed, ref, Ref, Teleport, watchEffect, DirectiveBinding, VNode, watch } from 'vue';
   import { 
-  ReducerActionType, 
   HTMLInputEvent, 
   UploadModalProps,
   CustomFile,
@@ -124,6 +122,7 @@
   import { useReducer } from '../composables/reducer';
   // import ProgressBar from './ProgressBar.vue';
   import CloudIcon from './CloudIcon.vue';
+import { ReducerAction } from '../composables/types';
 
   defineModel('show', { required: true });
   defineModel('files', { required: true, type: Array });
@@ -131,7 +130,7 @@
   const props = defineProps<Partial<UploadModalProps>>();
 
   // emits
-  const emit = defineEmits(['update:show', 'click', 'update:files',  'onComplete', 'OnCancel', 'onFileCompleted', 'onFileSelected']);
+  const emit = defineEmits(['update:show', 'click', 'update:files']);
 
   // Refs & definitions
   const reactiveShow = ref(props.show);
@@ -267,12 +266,8 @@
       }
       
       emit('update:files', fileListUpdater.value);
-      dispatch({ type: "CLICK" });
+      typeof dispatch === 'function' && dispatch({ type: "CLICK" });
     }
-  }
-
-  const handleFileCancel = (event: Event) => {
-    console.log("Cancelled.");
   }
 
   const closeAndResetModal = () => {
@@ -285,14 +280,16 @@
     invalidFileTypeCount.value = 0;
     fileArrTotalSize.value = 0;
 
-    dispatch({ type: "RESET" });
+    if (typeof dispatch === 'function') {
+      dispatch({ type: "RESET" });
+    }
 
     emit('update:files', []);
 
     closeModal();
   }
 
-  const reducer = (state: any, action: ReducerActionType) => {    
+  const reducer = (state: any, action: ReducerAction) => {    
     if (uploadStateMachine.states[state.current]) {
       return {
         ...state,
@@ -313,15 +310,10 @@
   }
 
   const dragStartHandler = (event: DragEvent) => {
-    event.currentTarget!.classList.add("dragging");
     event.dataTransfer!.dropEffect = 'move'
     event.dataTransfer!.effectAllowed = 'move'
     
     event.dataTransfer!.setData("text/plain", event.target!.id);
-  }
-
-  const dragEndHandler = (ev: DragEvent) => {
-    ev.target!.classList.remove("dragging");
   }
 
   const dropHandler = (event: DragEvent) => {
@@ -343,7 +335,8 @@
       
       // Emit an event with the dropped files
       emit('update:files', fileListUpdater.value);
-      dispatch({ type: "CLICK" });
+
+      typeof dispatch === 'function' && dispatch({ type: "CLICK" });
     }
   }
 
@@ -390,12 +383,13 @@
     reactiveShow.value = props.show;
 
     if (state.value.current === states.UPLOADING) {
-      setTimeout(() => dispatch({ type: "UPLOADED" }), 1000);
+      setTimeout(() => typeof dispatch === 'function' && dispatch({ type: "UPLOADED" }), 1000);
         return;
     }
 
     if (isFileUpload.value && !fileArr.value?.length) {
-      dispatch({ type: "RESET" });
+      
+      typeof dispatch === 'function' && dispatch({ type: "RESET" });
       isFileUpload.value = false;
     }
 

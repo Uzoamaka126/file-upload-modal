@@ -1,15 +1,3 @@
-export interface TriggerButtonProps {
-    buttonType: "text" | "block" | "outline";
-    styleObj: Record<string, string> | null;
-    label: string;
-    iconPosition: "left" | "right" | "none";
-    isCustomIcon: boolean;
-    classes: string;
-    disabled: boolean;
-    size: "sm" | "md" | "lg";
-    buttonTag: string;
-}
-
 export type ModalStyles = Partial<CSSStyleDeclaration> & {};
 
 export type FileListProps<T> = T[];
@@ -21,7 +9,6 @@ export interface UploadModalProps {
     styles: ModalStyles;
     modalContentClasses: string;
     mimeTypes: string;
-    isDropActive: boolean;
     show: boolean;
     persist: boolean;
     align: 'center' | 'middle' | 'left' | 'right' | 'bottom';
@@ -35,13 +22,6 @@ export type AppProps = Partial<UploadModalProps> & {
     buttonClass: string;
 }
 
-export type State = {
-    IDLE: "IDLE"; 
-    HOVERING: "HOVERING"; 
-    UPLOADING: "UPLOADING"; 
-    SUCCESS: "SUCCESS"
-}
-
 export type Events = {
     MOUSEENTER: "MOUSEENTER"; 
     MOUSELEAVE: "MOUSELEAVE"; 
@@ -51,32 +31,11 @@ export type Events = {
     UPLOADED: "UPLOADED"
 }
 
-export type UploaderMachineProps = {
-    initial: string;
-    states: { 
-        [x: string]: { 
-            on: { 
-                [x: string]: string; 
-            }; 
-        }; 
-    };
-    // states: Record<keyof State, {
-    //     on: Record<keyof Events, valueof<State>>
-    // }>
-}
-
-export type ReducerActionType = {
-    type: keyof Events | any
-}
-
-export type event = 'mouseenter' | 'mouseleave' | 'click' | "uploaded" | 'reset';
-
 export interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget;
 }
 
 export interface CustomFile extends File {
-    isDrag: boolean;
     modifiedFileSize: string;
     modifiedFileType: string;
     invalidFileType: boolean;

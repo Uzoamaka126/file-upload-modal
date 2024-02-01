@@ -1,14 +1,10 @@
 <template>
     <div>
-        <component :is="props.buttonTag" @click="isModalOpen = true" :class="props.buttonClass">
+        <component :is="props.buttonTag" @click="openModal" :class="props.buttonClass">
             <slot name="triggerButton" />
         </component>
         <div>
-            <UploadModal 
-                v-bind="props" 
-                v-model:show="isModalOpen"
-                v-model:files="fileList"
-            />
+            <UploadModal v-bind="props" v-model:show="isModalOpen" v-model:files="fileList" />
         </div>
     </div>
 </template>
@@ -17,8 +13,6 @@
   import { AppProps } from '../components/types.ts';
   import { ref } from 'vue';
   import UploadModal from '../components/UploadModal.vue'
-  
-  const emit = defineEmits(['toggle-modal'])
   
   const props = withDefaults(defineProps<Partial<AppProps>>(), {
     buttonTag: 'button',
@@ -38,8 +32,8 @@
 
   const isModalOpen = ref(false);
 
-  const toggleModalDisplay = () => {  
-    isModalOpen.value = !isModalOpen.value;
+  const openModal = () => {  
+    isModalOpen.value = true;
   }
 
 </script>
