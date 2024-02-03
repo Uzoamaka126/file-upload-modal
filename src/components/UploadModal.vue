@@ -46,7 +46,10 @@
                       >
                         <CloudIcon :state="state.current" />
                         <div class="message">
-                          <p :data-hidden="![states.IDLE, states.HOVERING].includes(state.current)">Drag & Drop or <span class="blue">Choose file </span>to upload</p>
+                          <p :data-hidden="![states.IDLE, states.HOVERING].includes(state.current)"> 
+                            <span v-if="props.draggable">Drag & Drop or</span>
+                            <span class="blue">Choose file </span>to upload
+                          </p>
                         </div>  
                       </div>
                     </template>
