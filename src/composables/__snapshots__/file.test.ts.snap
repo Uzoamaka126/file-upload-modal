@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`mount component > should mount component 1`] = `
+"<transition-stub data-v-d3ad3f7a="" appear="false" persisted="false" css="true">
+  <!--v-if-->
+</transition-stub>"
+`;
+
+exports[`mount component 1`] = `
+"<transition-stub data-v-d3ad3f7a="" appear="false" persisted="false" css="true">
+  <!--v-if-->
+</transition-stub>"
+`;
+
+exports[`test composables > should mount component 1`] = `
+"<transition-stub data-v-d3ad3f7a="" appear="false" persisted="false" css="true">
+  <!--v-if-->
+</transition-stub>"
+`;

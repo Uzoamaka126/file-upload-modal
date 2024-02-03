@@ -1,152 +1,139 @@
 <template>
-  <div>
-    <component :is="props.buttonTag" @click="emit('open')" :class="props.buttonClass">
-      <slot name="triggerButton" />
-    </component>
-    <!-- modal -->
-    <div>
-      <!-- <UploadModal v-bind="props" v-model:show="props.show" v-model:files="props.files" /> -->
-      <template v-if="props.persist">
-        <transition name="fade" :duration="300" mode="out-in">
-          <template>
-            <Teleport to="body">
-              <div class="modal--overlay" id="modalOverlay" v-show="reactiveShow" tabindex="-1" role="dialog">
-                <div class="modal--body" @keyup.stop.esc="hide">
-                  <div ref="focusElem" class="visually-hidden modal__outline" tabindex="0" />
-                  <div 
-                    class="modal--content" 
-                    :class="props.modalContentClasses" 
-                    v-click-outside="hide"
-                    @click.stop="emit('click')"
-                  >
-                    <div class="modal--header" :style="{ justifyContent: fileArr?.length ? 'space-between' : 'flex-end' }">
-                      <div v-if="fileArr?.length" class="align-center">
-                        <span class="modal--header--title">Uploads</span>
-                        <span class="modal--header--add " @click="handleFileBtnClick">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: #646cff;transform: ;msFilter:;">
-                            <path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4z"></path><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path>
-                          </svg>
-                        </span>
-                      </div>
-                      <button type="button" class="modal--close" style="line-height: 0px;" @click="$emit('update:show', false)">
-                        <svg viewBox="0 0 24 24" class="icon_close" width="24" height="24">
-                          <path fill="currentColor" fill-rule="nonzero" d="M5.146 5.146a.5.5 0 0 1 .708 0L12 11.293l6.146-6.147a.5.5 0 0 1 .638-.057l.07.057a.5.5 0 0 1 0 .708L12.707 12l6.147 6.146a.5.5 0 0 1 .057.638l-.057.07a.5.5 0 0 1-.708 0L12 12.707l-6.146 6.147a.5.5 0 0 1-.638.057l-.07-.057a.5.5 0 0 1 0-.708L11.293 12 5.146 5.854a.5.5 0 0 1-.057-.638z"></path>
+  <transition>
+    <template v-if="props.persist">
+      <transition name="fade" :duration="300" mode="out-in">
+        <template>
+          <Teleport to="body">
+            <div class="modal--overlay" id="modalOverlay" v-show="reactiveShow" tabindex="-1" role="dialog">
+              <div class="modal--body" @keyup.stop.esc="hide">
+                <div ref="focusElem" class="visually-hidden modal__outline" tabindex="0" />
+                <div 
+                  class="modal--content" 
+                  :class="props.modalContentClasses" 
+                  v-click-outside="hide"
+                  @click.stop="emit('click')"
+                >
+                  <div class="modal--header" :style="{ justifyContent: fileArr?.length ? 'space-between' : 'flex-end' }">
+                    <div v-if="fileArr?.length" class="align-center">
+                      <span class="modal--header--title">Uploads</span>
+                      <span class="modal--header--add " @click="handleFileBtnClick">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: #646cff;transform: ;msFilter:;">
+                          <path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4z"></path><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path>
                         </svg>
-                      </button>
+                      </span>
                     </div>
-                    <div 
-                      class="modal--upload--wrap" 
-                      ref="dragZoneRef" 
-                      :draggable="props.draggable"
-                      @dragstart="dragStartHandler" 
-                      @dragover.prevent
-                      @dragenter.prevent
-                      @drop="dropHandler"
-                    >
-                      <template v-if="!fileArr?.length">
-                        <div class="file--upload--wrap" 
-                          :data-state="state.current" 
-                          @mouseenter=" dispatch({ type: 'MOUSEENTER' })" 
-                          @mouseleave="dispatch({ type: 'MOUSELEAVE' })" 
-                          @click="handleFileBtnClick"
-                        >
-                          <CloudIcon :state="state.current" />
-                          <div class="message">
-                            <p :data-hidden="![states.IDLE, states.HOVERING].includes(state.current)"> 
-                              <span v-if="props.draggable">Drag & Drop or</span>
-                              <span class="blue">Choose file </span>to upload
-                            </p>
-                          </div>  
-                        </div>
-                      </template>
-
-                      <template v-else>
-                        <div class="file--uploaded--wrap">
-                          <ul class="file--list" :style="computeFileListHeight">
-                            <li v-for="file in fileArr" :key="file.name">
-                              <div class="file--item">
-                                <div class="success">
-                                  <span class="file--check--icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: #fa551e;transform: ;msFilter:;">
-                                      <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm4.207 12.793-1.414 1.414L12 13.414l-2.793 2.793-1.414-1.414L10.586 12 7.793 9.207l1.414-1.414L12 10.586l2.793-2.793 1.414 1.414L13.414 12l2.793 2.793z"></path>
-                                    </svg>
-                                  </span>
-                                  <div class="file--desc">
-                                    <p class="file--name">{{ file.name }}</p>
-                                    <div class="file--meta">
-                                      <p class="file--badge">{{ file.modifiedFileType }}</p>
-                                      <p v-if="file.invalidFileType" class="file--badge error">Invalid file type</p>
-                                      <p class="file--size">{{ file.modifiedFileSize }}</p>
-                                    </div>
+                    <button type="button" class="modal--close" style="line-height: 0px;" @click="$emit('update:show', false)">
+                      <svg viewBox="0 0 24 24" class="icon_close" width="24" height="24">
+                        <path fill="currentColor" fill-rule="nonzero" d="M5.146 5.146a.5.5 0 0 1 .708 0L12 11.293l6.146-6.147a.5.5 0 0 1 .638-.057l.07.057a.5.5 0 0 1 0 .708L12.707 12l6.147 6.146a.5.5 0 0 1 .057.638l-.057.07a.5.5 0 0 1-.708 0L12 12.707l-6.146 6.147a.5.5 0 0 1-.638.057l-.07-.057a.5.5 0 0 1 0-.708L11.293 12 5.146 5.854a.5.5 0 0 1-.057-.638z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <div 
+                    class="modal--upload--wrap" 
+                    ref="dragZoneRef" 
+                    :draggable="props.draggable"
+                    @dragstart="dragStartHandler" 
+                    @dragover.prevent
+                    @dragenter.prevent
+                    @drop="dropHandler"
+                  >
+                    <template v-if="!fileArr?.length">
+                      <div class="file--upload--wrap" 
+                        :data-state="state.current" 
+                        @mouseenter=" dispatch({ type: 'MOUSEENTER' })" 
+                        @mouseleave="dispatch({ type: 'MOUSELEAVE' })" 
+                        @click="handleFileBtnClick"
+                      >
+                        <CloudIcon :state="state.current" />
+                        <div class="message">
+                          <p :data-hidden="![states.IDLE, states.HOVERING].includes(state.current)"> 
+                            <span v-if="props.draggable">Drag & Drop or</span>
+                            <span class="blue">Choose file </span>to upload
+                          </p>
+                        </div>  
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div class="file--uploaded--wrap">
+                        <ul class="file--list" :style="computeFileListHeight">
+                          <li v-for="file in fileArr" :key="file.name">
+                            <div class="file--item">
+                              <div class="success">
+                                <span class="file--check--icon">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: #fa551e;transform: ;msFilter:;">
+                                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm4.207 12.793-1.414 1.414L12 13.414l-2.793 2.793-1.414-1.414L10.586 12 7.793 9.207l1.414-1.414L12 10.586l2.793-2.793 1.414 1.414L13.414 12l2.793 2.793z"></path>
+                                  </svg>
+                                </span>
+                                <div class="file--desc">
+                                  <p class="file--name">{{ file.name }}</p>
+                                  <div class="file--meta">
+                                    <p class="file--badge">{{ file.modifiedFileType }}</p>
+                                    <p v-if="file.invalidFileType" class="file--badge error">Invalid file type</p>
+                                    <p class="file--size">{{ file.modifiedFileSize }}</p>
                                   </div>
                                 </div>
-                                <span class="file--item--cancel btn btn--text" @click="removeFileByIndex(file.name)">Remove</span>
-                              </div>                      
-                            </li>
-                          </ul>
-                          <div class="upload--btns align-center" :class="{ 'double': fileUploadSizeExceeded }">
-                            <div v-if="fileUploadSizeExceeded">
-                              <p class="error--text">File upload size exceeded. Max size is <strong>5MB</strong></p>
-                            </div>
-                            <div>
-                              <button class="btn btn--outline sm upload--btn--cancel" type="button" @click="closeAndResetModal">Cancel</button>
-                              <button class="btn btn--block sm upload--btn--complete" type="button" :disabled="disableCompleteBtn" @click="onUploadComplete">
-                                Finish
-                              </button>
-                            </div>
+                              </div>
+                              <span class="file--item--cancel btn btn--text" @click="removeFileByIndex(file.name)">Remove</span>
+                            </div>                      
+                          </li>
+                        </ul>
+                        <div class="upload--btns align-center" :class="{ 'double': fileUploadSizeExceeded }">
+                          <div v-if="fileUploadSizeExceeded">
+                            <p class="error--text">File upload size exceeded. Max size is <strong>5MB</strong></p>
+                          </div>
+                          <div>
+                            <button class="btn btn--outline sm upload--btn--cancel" type="button" @click="closeAndResetModal">Cancel</button>
+                            <button 
+                              class="btn btn--block sm upload--btn--complete" 
+                              type="button"
+                              :disabled="disableCompleteBtn" 
+                              @click="onUploadComplete"
+                            >
+                              Finish
+                            </button>
                           </div>
                         </div>
-                      </template>
-
-                      <input
-                        type="file"
-                        @change="e => handleFileChange(e)"
-                        ref="fileRef"
-                        :accept="props.mimeTypes"
-                        v-bind:multiple="props.isMulti"
-                        :style="{ display: 'none' }"
-                      />
-                    </div>
+                      </div>
+                    </template>
+                    <input
+                      type="file"
+                      @change="e => handleFileChange(e)"
+                      ref="fileRef"
+                      :accept="props.mimeTypes"
+                      v-bind:multiple="props.isMulti"
+                      :style="{ display: 'none' }"
+                    />
                   </div>
                 </div>
               </div>
-            </Teleport>
-          </template>
-        </transition>
-      </template>
-    </div>
-  </div>
+            </div>
+          </Teleport>
+        </template>
+      </transition>
+    </template>
+  </transition>
 </template>
 
 <script setup lang="ts">
-// import UploadModal from './components/UploadModal.vue'
-import { AppProps } from './components/types';
-import { computed, ref, Ref, Teleport, watchEffect, DirectiveBinding, VNode, watch } from 'vue';
-import { HTMLInputEvent, CustomFile } from './components/types'
-import { states, uploadStateMachine, fileExtensions } from './utils/constants';
-import { useReducer } from './composables/reducer';
-import CloudIcon from './components/CloudIcon.vue';
-import { ReducerAction } from './composables/types';
+  import { computed, ref, Ref, Teleport, watchEffect, DirectiveBinding, VNode, watch } from 'vue';
+  import { 
+  HTMLInputEvent, 
+  UploadModalProps,
+  CustomFile,
+} from './types'
+  import { states, uploadStateMachine, fileExtensions } from '../utils/constants';
+  import { useReducer } from '../composables/reducer';
+  // import ProgressBar from './ProgressBar.vue';
+  import CloudIcon from './CloudIcon.vue';
+import { ReducerAction } from '../composables/types';
 
-defineModel('show', { required: true });
-defineModel('files', { required: true, type: Array });
+  defineModel('show', { required: true });
+  defineModel('files', { required: true, type: Array });
 
-const emit = defineEmits(['open', 'update:show', 'click', 'update:files', 'onComplete']);
+  const props = defineProps<Partial<UploadModalProps>>();
 
-const props = withDefaults(defineProps<Partial<AppProps>>(), {
-  buttonTag: 'button',
-  buttonClass: 'btn btn--text sm',
-  isMulti: false,
-  mimeTypes: ".pdf",
-  maxUploadSize: 5000 * 1000, // 5MB
-  persist: true,
-  align: 'center',
-  disabled: false,
-  modalContentClasses: '',
-  files: null,
-  show: false,
-  draggable: false
-});
+  // emits
+  const emit = defineEmits(['update:show', 'click', 'update:files']);
 
   // Refs & definitions
   const reactiveShow = ref(props.show);
@@ -305,7 +292,11 @@ const props = withDefaults(defineProps<Partial<AppProps>>(), {
   }
 
   const onUploadComplete = () => {
-    emit("onComplete");
+    const payload = {
+      files: fileArr.value,
+    };
+
+    emit("onComplete", payload); // return the selected files back to the parent
     closeAndResetModal();
   }
 
@@ -400,10 +391,6 @@ const props = withDefaults(defineProps<Partial<AppProps>>(), {
 </script>
 
 <style scoped>
-.app {
-  position: relative;
-}
-
 .modal--overlay {
   position: fixed; 
   left: 0;

@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`App > app should be able to load 1`] = `
+"<div data-v-7a7a37b1=""><button data-v-7a7a37b1="" class="btn btn--text sm"></button>
+  <div data-v-7a7a37b1="">
+    <transition-stub data-v-d3ad3f7a="" data-v-7a7a37b1="" appear="false" persisted="false" css="true" buttontag="button" buttonclass="btn btn--text sm">
+      <transition-stub data-v-d3ad3f7a="" name="fade" duration="300" mode="out-in" appear="false" persisted="false" css="true"><template data-v-d3ad3f7a="">
+          <!--teleport start-->
+          <!--teleport end-->
+        </template></transition-stub>
+    </transition-stub>
+  </div>
+</div>"
+`;
+
+exports[`App > should render app with default props 1`] = `
+"<div data-v-7a7a37b1=""><button data-v-7a7a37b1="" class="btn btn--text sm"></button>
+  <div data-v-7a7a37b1="">
+    <transition-stub data-v-d3ad3f7a="" data-v-7a7a37b1="" appear="false" persisted="false" css="true" buttontag="button" buttonclass="btn btn--text sm">
+      <transition-stub data-v-d3ad3f7a="" name="fade" duration="300" mode="out-in" appear="false" persisted="false" css="true"><template data-v-d3ad3f7a="">
+          <!--teleport start-->
+          <!--teleport end-->
+        </template></transition-stub>
+    </transition-stub>
+  </div>
+</div>"
+`;
+
+exports[`App > should render upload modal component 1`] = `
+"<transition-stub data-v-d3ad3f7a="" appear="false" persisted="false" css="true">
+  <!--v-if-->
+</transition-stub>"
+`;
