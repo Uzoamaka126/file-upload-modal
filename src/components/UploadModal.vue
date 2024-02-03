@@ -3,8 +3,8 @@
     <template v-if="props.persist">
       <transition name="fade" :duration="300" mode="out-in">
         <template>
-          <Teleport to="body" :disabled="props.disabled">
-            <div class="modal--overlay" v-show="reactiveShow" tabindex="-1" role="dialog">
+          <Teleport to="body">
+            <div class="modal--overlay" id="modalOverlay" v-show="reactiveShow" tabindex="-1" role="dialog">
               <div class="modal--body" @keyup.stop.esc="hide">
                 <div ref="focusElem" class="visually-hidden modal__outline" tabindex="0" />
                 <div 
@@ -96,7 +96,7 @@
                       type="file"
                       @change="e => handleFileChange(e)"
                       ref="fileRef"
-                      :accept="computedFileTypes"
+                      :accept="props.mimeTypes"
                       v-bind:multiple="props.isMulti"
                       :style="{ display: 'none' }"
                     />
@@ -118,7 +118,7 @@
   UploadModalProps,
   CustomFile,
 } from './types'
-  import { states, uploadStateMachine, defaultFileTypes, fileExtensions } from '../utils/constants';
+  import { states, uploadStateMachine, fileExtensions } from '../utils/constants';
   import { useReducer } from '../composables/reducer';
   // import ProgressBar from './ProgressBar.vue';
   import CloudIcon from './CloudIcon.vue';
@@ -148,18 +148,6 @@ import { ReducerAction } from '../composables/types';
   const dragging = ref(false);
 
   // Computed properties
-  const computedFileTypes = computed(() => {
-    if (props.isMulti) {
-      if (props.mimeTypes?.length) {
-        return props.mimeTypes;
-      } else {
-        return defaultFileTypes
-      }
-    }  else {
-      return props.mimeTypes;
-    }
-  });
-
   const computeFileListHeight = computed(() => {    
     if (fileArr.value!?.length > 4) {
       return { height: '370px', overflow: 'scroll' }

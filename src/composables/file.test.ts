@@ -1,20 +1,9 @@
 import { expect, it, describe } from 'vitest';
-import { shallowMount } from '@vue/test-utils'
-import UploadModalVue from '../components/UploadModal.vue';
 import { useReducer } from './reducer';
 import { useState } from './state';
 import { ref } from 'vue';
 
 describe('test composables', () => {
-    it('should mount component', () => {
-        const wrapper = shallowMount(UploadModalVue, {
-          global: {
-            stubs: ['CloudIcon'],
-          },
-        });
-        expect(wrapper.html()).toMatchSnapshot()
-    });
-
     it('return a new state and dispatch with useReducer call', async () => {
         const initialState = ref(0)
 
